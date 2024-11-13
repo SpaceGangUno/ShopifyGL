@@ -1,3 +1,4 @@
+/* Logo 3D Spin Animation */
 @keyframes spin-logo {
   0% {
     transform: perspective(1000px) rotateY(0deg);
@@ -7,7 +8,17 @@
   }
 }
 
-/* Target the specific logo structure */
+/* Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Logo Styles */
 .header .header__heading-link img,
 .header__heading-logo-wrapper img,
 .header__heading-logo {
@@ -20,14 +31,44 @@
   will-change: transform !important;
 }
 
-/* Pause animation on hover */
+/* Pause logo animation on hover */
 .header .header__heading-link:hover img,
 .header__heading-logo-wrapper:hover img,
 .header__heading-logo:hover {
   animation-play-state: paused !important;
 }
 
-/* Enhanced sticky header styles */
+/* Marquee Container */
+.marquee-container {
+  position: relative;
+  overflow: hidden;
+  --duration: 30s;
+  --gap: 1rem;
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  gap: var(--gap);
+  mask-image: linear-gradient(
+    var(--mask-direction, to right),
+    transparent,
+    black 20%,
+    black 80%,
+    transparent
+  );
+}
+
+/* Marquee Content */
+.marquee {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  gap: var(--gap);
+  min-width: 100%;
+  animation: marquee var(--duration) linear infinite;
+  white-space: nowrap;
+}
+
+/* Sticky Header Styles */
 .shopify-section-header-sticky {
   position: fixed !important;
   top: 0 !important;
@@ -95,4 +136,16 @@ sticky-header {
 .header__heading-logo-wrapper,
 .header__heading-link {
   transition: all 0.3s ease-in-out !important;
+}
+
+/* Announcement bar styles */
+.announcement-bar {
+  padding: 10px 0;
+  width: 100%;
+}
+
+.announcement-bar__message {
+  display: inline-block;
+  padding: 0 15px;
+  margin: 0;
 }
