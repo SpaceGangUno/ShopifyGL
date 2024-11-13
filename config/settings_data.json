@@ -144,11 +144,6 @@
     },
     "content_for_index": [],
     "blocks": {
-      "2750577133604425700": {
-        "type": "shopify://apps/sitepost/blocks/ai_editor/2eb8ec3a-287f-4063-a9de-defa3457d6cb",
-        "disabled": false,
-        "settings": {}
-      },
       "855628211100114053": {
         "type": "shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507",
         "disabled": false,
