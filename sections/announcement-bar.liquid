@@ -11,24 +11,6 @@
   if section.blocks.size > 0
     assign announcement_bar = true
   endif
-
-  assign announcement_text = ''
-  for block in section.blocks
-    if block.settings.text != blank
-      capture temp_text
-        if block.settings.link != blank
-          echo '<a href="' | append: block.settings.link | append: '" class="announcement-bar__link link link--text focus-inset">'
-        endif
-        echo '<span class="announcement-bar__message h5">'
-        echo block.settings.text | escape
-        echo '</span>'
-        if block.settings.link != blank
-          echo '</a>'
-        endif
-      endcapture
-      assign announcement_text = announcement_text | append: temp_text
-    endif
-  endfor
 -%}
 
 {% if social_icons %}
@@ -45,14 +27,34 @@
     {%- endif -%}
     
     {%- if section.blocks.size > 0 -%}
-      <div class="announcement-bar marquee-container" role="region" aria-label="{{ 'sections.header.announcement' | t }}">
+      <div class="announcement-bar" role="region" aria-label="{{ 'sections.header.announcement' | t }}">
         <div class="marquee">
-          <span>{{ announcement_text }}</span>
-          <span>{{ announcement_text }}</span>
-          <span>{{ announcement_text }}</span>
-          <span>{{ announcement_text }}</span>
-          <span>{{ announcement_text }}</span>
-          <span>{{ announcement_text }}</span>
+          {%- for block in section.blocks -%}
+            {%- if block.settings.text != blank -%}
+              <span class="announcement-bar__message h5">
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="announcement-bar__link link link--text focus-inset">
+                {%- endif -%}
+                {{ block.settings.text | escape }}
+                {%- if block.settings.link != blank -%}
+                  </a>
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
+          {%- for block in section.blocks -%}
+            {%- if block.settings.text != blank -%}
+              <span class="announcement-bar__message h5">
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="announcement-bar__link link link--text focus-inset">
+                {%- endif -%}
+                {{ block.settings.text | escape }}
+                {%- if block.settings.link != blank -%}
+                  </a>
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+          {%- endfor -%}
         </div>
       </div>
     {%- endif -%}

@@ -8,16 +8,6 @@
   }
 }
 
-/* Marquee Animation */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
 /* Logo Styles */
 .header .header__heading-link img,
 .header__heading-logo-wrapper img,
@@ -38,34 +28,35 @@
   animation-play-state: paused !important;
 }
 
-/* Marquee Container */
-.marquee-container {
+/* Announcement Bar Styles */
+.announcement-bar {
   position: relative;
+  width: 100%;
   overflow: hidden;
-  --duration: 30s;
-  --gap: 1rem;
-  display: flex;
-  overflow: hidden;
-  user-select: none;
-  gap: var(--gap);
-  mask-image: linear-gradient(
-    var(--mask-direction, to right),
-    transparent,
-    black 20%,
-    black 80%,
-    transparent
-  );
+  height: auto;
+  padding: 10px 0;
 }
 
-/* Marquee Content */
 .marquee {
-  flex-shrink: 0;
+  position: relative;
+  width: fit-content;
   display: flex;
-  justify-content: space-around;
-  gap: var(--gap);
-  min-width: 100%;
-  animation: marquee var(--duration) linear infinite;
+  animation: scroll 20s linear infinite;
   white-space: nowrap;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.announcement-bar__message {
+  padding: 0 20px;
+  flex-shrink: 0;
 }
 
 /* Sticky Header Styles */
@@ -138,14 +129,16 @@ sticky-header {
   transition: all 0.3s ease-in-out !important;
 }
 
-/* Announcement bar styles */
-.announcement-bar {
-  padding: 10px 0;
-  width: 100%;
+/* Utility bar grid styles */
+.utility-bar__grid {
+  display: grid;
+  align-items: center;
 }
 
-.announcement-bar__message {
-  display: inline-block;
-  padding: 0 15px;
-  margin: 0;
+.utility-bar__grid--2-col {
+  grid-template-columns: 1fr auto;
+}
+
+.utility-bar__grid--3-col {
+  grid-template-columns: auto 1fr auto;
 }
