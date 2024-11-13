@@ -15,7 +15,7 @@
         "slide_wQYt9x": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/HEADER-MOBILE-AND-WEB_5.jpg",
+            "image": "shopify://shop_images/HEADER-MOBILE-AND-WEB_2.jpg",
             "heading": "",
             "heading_size": "h2",
             "subheading": "",
@@ -65,25 +65,18 @@
           "settings": {
             "collection": "jackets"
           }
-        },
-        "featured_collection_76UEm6": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": "t-shirt"
-          }
         }
       },
       "block_order": [
         "featured_collection_qNjWH3",
         "featured_collection_FDfH9x",
-        "featured_collection_y6n9yf",
-        "featured_collection_76UEm6"
+        "featured_collection_y6n9yf"
       ],
       "settings": {
         "title": "Shop by Category",
         "heading_size": "h2",
         "image_ratio": "square",
-        "columns_desktop": 4,
+        "columns_desktop": 3,
         "color_scheme": "scheme-5",
         "show_view_all": false,
         "columns_mobile": "2",
@@ -151,7 +144,7 @@
     "image_banner_n8xg9G": {
       "type": "image-banner",
       "settings": {
-        "image": "shopify://shop_images/GEAR_LOCKER_WEBSITE-02_1.png",
+        "image": "shopify://shop_images/GEAR_LOCKER_WEBSITE-02.png",
         "image_overlay_opacity": 0,
         "image_height": "adapt",
         "desktop_content_position": "middle-center",
