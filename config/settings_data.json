@@ -153,6 +153,37 @@
         "type": "shopify://apps/blockify-fraud-blocker/blocks/app_embed/2e3e0ba5-0e70-447a-9ec5-3bf76b5ef12e",
         "disabled": false,
         "settings": {}
+      },
+      "13045373370263289942": {
+        "type": "shopify://apps/vanga-ai-upsell-app/blocks/cart/d34a5796-ad60-4937-91b7-563911e0a6ee",
+        "disabled": false,
+        "settings": {
+          "show_continue_shopping": false,
+          "upsell_aspect_ratio": "square",
+          "theme_mode": "light",
+          "accent_color": "#000000",
+          "button_color": "#000000",
+          "button_text_color": "#ffffff",
+          "button_weight": "bold",
+          "use_gradient": false,
+          "button_gradient1": "",
+          "button_gradient2": "",
+          "gradient_direction": "vertical",
+          "show_apple_pay_logo": false,
+          "show_google_pay_logo": false,
+          "show_paypal_logo": false,
+          "show_amex_logo": false,
+          "show_visa_logo": false,
+          "show_mastercard_logo": false,
+          "show_maestro_logo": false,
+          "show_shoppay_logo": false,
+          "show_klarna_logo": false,
+          "show_free_shipping_progress": true,
+          "require_consent": false,
+          "terms_and_conditions_url": "",
+          "upsell_price_location": "inside_button",
+          "vanga_cart_custom_css": ""
+        }
       }
     },
     "color_schemes": {
