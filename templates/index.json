@@ -9,15 +9,31 @@
  */
 {
   "sections": {
+    "image_banner_RtTXwc": {
+      "type": "image-banner",
+      "settings": {
+        "image": "shopify://shop_images/Copy_of_Green_Mens_Clothing_Website_Template_-_Client_Official_1.jpg",
+        "image_overlay_opacity": 0,
+        "image_height": "adapt",
+        "desktop_content_position": "middle-center",
+        "show_text_box": true,
+        "desktop_content_alignment": "center",
+        "color_scheme": "scheme-e06ee1b9-465e-4978-81a8-556639459faa",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false
+      }
+    },
     "slideshow": {
       "type": "slideshow",
       "blocks": {
         "slide_wQYt9x": {
           "type": "slide",
           "settings": {
-            "image": "shopify://shop_images/HEADER-MOBILE-AND-WEB_5.jpg",
+            "image": "shopify://shop_images/Copy_of_Green_Mens_Clothing_Website_Template_-_Client_Official_1.jpg",
             "heading": "",
-            "heading_size": "h2",
+            "heading_size": "h1",
             "subheading": "",
             "button_label": "",
             "link": "",
@@ -34,6 +50,7 @@
       "block_order": [
         "slide_wQYt9x"
       ],
+      "disabled": true,
       "settings": {
         "layout": "full_bleed",
         "slide_height": "large",
@@ -203,6 +220,7 @@
     }
   },
   "order": [
+    "image_banner_RtTXwc",
     "slideshow",
     "featured_collection_N4gBxm",
     "image_banner_7twRjX",
