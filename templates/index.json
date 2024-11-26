@@ -56,7 +56,7 @@
     "image_banner_7twRjX": {
       "type": "image-banner",
       "settings": {
-        "image": "shopify://shop_images/GEAR_LOCKER_WEBSITE_BANNER_MYSTERY_BOX-04.png",
+        "image": "shopify://shop_images/GEAR-LOCKER-WEBSITE2.jpg",
         "image_overlay_opacity": 0,
         "image_height": "adapt",
         "desktop_content_position": "middle-center",
@@ -72,8 +72,8 @@
     "featured_collection_RYDXcG": {
       "type": "featured-collection",
       "settings": {
-        "title": "",
-        "heading_size": "h1",
+        "title": "Get Yours Today",
+        "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
