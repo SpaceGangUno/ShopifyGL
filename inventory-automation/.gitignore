@@ -1,0 +1,4 @@
+.env
+node_modules/
+checkpoint.json
+temp_creds.txt
