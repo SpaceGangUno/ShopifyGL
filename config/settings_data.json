@@ -46,7 +46,7 @@
     "card_style": "card",
     "card_image_padding": 16,
     "card_text_alignment": "left",
-    "card_color_scheme": "scheme-e06ee1b9-465e-4978-81a8-556639459faa",
+    "card_color_scheme": "scheme-1",
     "card_border_thickness": 1,
     "card_border_opacity": 100,
     "card_corner_radius": 18,
@@ -192,7 +192,7 @@
           "background": "#eff0f5",
           "background_gradient": "",
           "text": "#0e1b4d",
-          "button": "#4770db",
+          "button": "#080808",
           "button_label": "#eff0f5",
           "secondary_button_label": "#0e1b4d",
           "shadow": "#0e1b4d"
