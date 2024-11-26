@@ -12,12 +12,10 @@ if (!process.env.SHOPIFY_ACCESS_TOKEN || !process.env.SHOPIFY_SHOP_DOMAIN) {
 
 // Configuration
 const API_VERSION = '2024-01';
-const BATCH_SIZE = 250; // Maximum allowed by Shopify
+const BATCH_SIZE = 50; // Reduced batch size to use less memory
 const RATE_LIMIT_DELAY = 500; // 500ms between requests
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000; // 5 seconds
-const CHECKPOINT_FILE = path.join(__dirname, 'checkpoint.json');
-const TEST_MODE = false; // Set to false for processing all products
 
 // Initialize axios client with base configuration
 const shopify = axios.create({
@@ -28,30 +26,6 @@ const shopify = axios.create({
   },
   timeout: 30000 // 30 second timeout
 });
-
-// Function to save checkpoint
-async function saveCheckpoint(data) {
-  try {
-    await fs.writeFile(CHECKPOINT_FILE, JSON.stringify(data, null, 2));
-    console.log('\nCheckpoint saved');
-  } catch (error) {
-    console.error('Error saving checkpoint:', error.message);
-  }
-}
-
-// Function to load checkpoint
-async function loadCheckpoint() {
-  try {
-    const data = await fs.readFile(CHECKPOINT_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return null;
-    }
-    console.error('Error loading checkpoint:', error.message);
-    return null;
-  }
-}
 
 // Function to handle API errors with retry
 async function handleApiError(error, retryCount = 0) {
@@ -91,64 +65,6 @@ async function fetchProducts(params, retryCount = 0) {
   }
 }
 
-// Function to fetch all products with pagination
-async function getAllProducts(startAfter = null) {
-  let products = [];
-  let page_info = startAfter;
-  let hasMore = true;
-  
-  console.log('\nFetching products...');
-  
-  while (hasMore) {
-    try {
-      const params = {
-        limit: BATCH_SIZE
-      };
-      
-      if (page_info) {
-        params.page_info = page_info;
-      }
-      
-      const response = await fetchProducts(params);
-      const newProducts = response.data.products;
-      products = products.concat(newProducts);
-      
-      // Progress update
-      console.log(`Fetched ${products.length} products so far...`);
-      
-      // Save checkpoint
-      await saveCheckpoint({
-        lastPageInfo: page_info,
-        totalFetched: products.length,
-        lastUpdateTime: new Date().toISOString()
-      });
-      
-      // Check for next page
-      const link = response.headers['link'];
-      if (link && link.includes('rel="next"')) {
-        page_info = link.match(/page_info=([^&>]*)/)[1];
-        
-        // In test mode, limit the number of products
-        if (TEST_MODE && products.length >= 10) {
-          console.log('\nTest mode: Limiting to 10 products');
-          hasMore = false;
-        }
-      } else {
-        hasMore = false;
-      }
-      
-      // Respect rate limits
-      await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
-      
-    } catch (error) {
-      console.error('Error fetching products:', error.message);
-      throw error;
-    }
-  }
-  
-  return products;
-}
-
 // Function to update variant inventory management with retry
 async function updateVariantInventoryManagement(variantId, retryCount = 0) {
   try {
@@ -170,75 +86,88 @@ async function updateVariantInventoryManagement(variantId, retryCount = 0) {
   }
 }
 
-// Main function to process all products and variants
+// Main function to process products and variants
 async function updateAllInventoryTracking() {
   try {
     console.log('=== Shopify Inventory Tracking Update Script ===');
     console.log(`Connected to shop: ${process.env.SHOPIFY_SHOP_DOMAIN}`);
-    console.log(`Running in ${TEST_MODE ? 'TEST MODE' : 'PRODUCTION MODE'}`);
     
-    // Check for existing checkpoint
-    const checkpoint = await loadCheckpoint();
-    let startAfter = null;
-    
-    if (checkpoint) {
-      console.log('\nFound existing checkpoint:');
-      console.log(`Last processed: ${checkpoint.totalFetched} products`);
-      console.log(`Last update: ${checkpoint.lastUpdateTime}`);
-      console.log('Resuming from last checkpoint...\n');
-      startAfter = checkpoint.lastPageInfo;
-    }
-    
-    // Get products
-    const products = await getAllProducts(startAfter);
-    console.log(`\nFound ${products.length} products to process`);
-    
+    let page_info = null;
+    let hasMore = true;
+    let totalProducts = 0;
     let updatedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
     
-    // Process each product and its variants
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      console.log(`\nProcessing product ${i + 1}/${products.length}: ${product.title} (${product.variants.length} variants)`);
-      
-      for (const variant of product.variants) {
-        try {
-          if (variant.inventory_management !== 'shopify') {
-            await updateVariantInventoryManagement(variant.id);
-            updatedCount++;
-            await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
-          } else {
-            console.log(`⚡ Skipping variant ${variant.id} - already using Shopify inventory management`);
-            skippedCount++;
-          }
-        } catch (error) {
-          console.error(`Failed to update variant ${variant.id}:`, error.message);
-          errorCount++;
+    while (hasMore) {
+      try {
+        const params = {
+          limit: BATCH_SIZE
+        };
+        
+        if (page_info) {
+          params.page_info = page_info;
         }
-      }
-      
-      // Progress update
-      if ((i + 1) % 10 === 0) {
-        console.log(`\nProgress: ${((i + 1) / products.length * 100).toFixed(1)}% complete`);
-        console.log(`Updated: ${updatedCount} | Skipped: ${skippedCount} | Errors: ${errorCount}`);
+        
+        const response = await fetchProducts(params);
+        const products = response.data.products;
+        totalProducts += products.length;
+        
+        console.log(`\nProcessing batch of ${products.length} products (Total processed: ${totalProducts})`);
+        
+        // Process each product and its variants
+        for (const product of products) {
+          console.log(`\nProcessing product: ${product.title} (${product.variants.length} variants)`);
+          
+          for (const variant of product.variants) {
+            try {
+              if (variant.inventory_management !== 'shopify') {
+                await updateVariantInventoryManagement(variant.id);
+                updatedCount++;
+                await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
+              } else {
+                console.log(`⚡ Skipping variant ${variant.id} - already using Shopify inventory management`);
+                skippedCount++;
+              }
+            } catch (error) {
+              console.error(`Failed to update variant ${variant.id}:`, error.message);
+              errorCount++;
+            }
+          }
+        }
+        
+        // Progress update
+        console.log(`\nProgress Update:`);
+        console.log(`Total products processed: ${totalProducts}`);
+        console.log(`Variants updated: ${updatedCount}`);
+        console.log(`Variants skipped: ${skippedCount}`);
+        console.log(`Errors: ${errorCount}`);
+        
+        // Check for next page
+        const link = response.headers['link'];
+        if (link && link.includes('rel="next"')) {
+          page_info = link.match(/page_info=([^&>]*)/)[1];
+        } else {
+          hasMore = false;
+        }
+        
+        // Respect rate limits
+        await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
+        
+      } catch (error) {
+        console.error('Error processing batch:', error.message);
+        errorCount++;
+        // Continue with next batch even if current one fails
+        hasMore = false;
       }
     }
     
-    // Clean up checkpoint file after successful completion
-    await fs.unlink(CHECKPOINT_FILE).catch(() => {});
-    
     console.log('\n=== Inventory Tracking Update Summary ===');
-    console.log(`Total products processed: ${products.length}`);
+    console.log(`Total products processed: ${totalProducts}`);
     console.log(`Variants updated: ${updatedCount}`);
     console.log(`Variants skipped (already configured): ${skippedCount}`);
     console.log(`Errors encountered: ${errorCount}`);
     console.log('Process completed! ✨');
-    
-    if (TEST_MODE) {
-      console.log('\nTest mode completed successfully.');
-      console.log('To process all products, set TEST_MODE to false and run the script again.');
-    }
     
   } catch (error) {
     console.error('\n❌ Error in update process:', error.message);
