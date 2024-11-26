@@ -17,7 +17,7 @@ const RATE_LIMIT_DELAY = 500; // 500ms between requests
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000; // 5 seconds
 const CHECKPOINT_FILE = path.join(__dirname, 'checkpoint.json');
-const TEST_MODE = true; // Set to false for processing all products
+const TEST_MODE = false; // Set to false for processing all products
 
 // Initialize axios client with base configuration
 const shopify = axios.create({
