@@ -88,6 +88,23 @@
   text-decoration: line-through;
   color: rgba(var(--color-foreground), 0.75);
   font-size: 1.3rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.price--on-sale .price-item--sale {
+  color: #E31837; /* Black Friday red color */
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.price--on-sale .price__badge-sale {
+  background: #E31837; /* Black Friday red color */
+  color: #FFFFFF;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  font-weight: bold;
+  margin-left: 0.5rem;
 }
 
 .unit-price {
