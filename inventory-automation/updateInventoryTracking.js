@@ -86,10 +86,32 @@ async function updateVariantInventoryManagement(variantId, retryCount = 0) {
   }
 }
 
+// Function to enable POS for a product
+async function enablePOS(productId, retryCount = 0) {
+  try {
+    const response = await shopify.put(`/products/${productId}.json`, {
+      product: {
+        id: productId,
+        published_scope: 'global',
+        published_status: 'published',
+        published_at: new Date().toISOString()
+      }
+    });
+    console.log(`✓ Enabled POS for product ${productId}`);
+    return response.data;
+  } catch (error) {
+    const { shouldRetry } = await handleApiError(error, retryCount);
+    if (shouldRetry) {
+      return enablePOS(productId, retryCount + 1);
+    }
+    throw error;
+  }
+}
+
 // Main function to process products and variants
 async function updateAllInventoryTracking() {
   try {
-    console.log('=== Shopify Inventory Tracking Update Script ===');
+    console.log('=== Shopify Inventory Tracking and POS Update Script ===');
     console.log(`Connected to shop: ${process.env.SHOPIFY_SHOP_DOMAIN}`);
     
     let page_info = null;
@@ -98,6 +120,7 @@ async function updateAllInventoryTracking() {
     let updatedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
+    let posEnabledCount = 0;
     
     while (hasMore) {
       try {
@@ -118,19 +141,34 @@ async function updateAllInventoryTracking() {
         // Process each product and its variants
         for (const product of products) {
           console.log(`\nProcessing product: ${product.title} (${product.variants.length} variants)`);
+          let hasInventoryTracking = false;
           
           for (const variant of product.variants) {
             try {
               if (variant.inventory_management !== 'shopify') {
                 await updateVariantInventoryManagement(variant.id);
                 updatedCount++;
+                hasInventoryTracking = true;
                 await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
               } else {
                 console.log(`⚡ Skipping variant ${variant.id} - already using Shopify inventory management`);
+                hasInventoryTracking = true;
                 skippedCount++;
               }
             } catch (error) {
               console.error(`Failed to update variant ${variant.id}:`, error.message);
+              errorCount++;
+            }
+          }
+          
+          // If product has inventory tracking, enable it in POS
+          if (hasInventoryTracking) {
+            try {
+              await enablePOS(product.id);
+              posEnabledCount++;
+              await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY));
+            } catch (error) {
+              console.error(`Failed to enable POS for product ${product.id}:`, error.message);
               errorCount++;
             }
           }
@@ -141,6 +179,7 @@ async function updateAllInventoryTracking() {
         console.log(`Total products processed: ${totalProducts}`);
         console.log(`Variants updated: ${updatedCount}`);
         console.log(`Variants skipped: ${skippedCount}`);
+        console.log(`Products enabled in POS: ${posEnabledCount}`);
         console.log(`Errors: ${errorCount}`);
         
         // Check for next page
@@ -162,10 +201,11 @@ async function updateAllInventoryTracking() {
       }
     }
     
-    console.log('\n=== Inventory Tracking Update Summary ===');
+    console.log('\n=== Inventory Tracking and POS Update Summary ===');
     console.log(`Total products processed: ${totalProducts}`);
     console.log(`Variants updated: ${updatedCount}`);
     console.log(`Variants skipped (already configured): ${skippedCount}`);
+    console.log(`Products enabled in POS: ${posEnabledCount}`);
     console.log(`Errors encountered: ${errorCount}`);
     console.log('Process completed! ✨');
     
