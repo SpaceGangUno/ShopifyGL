@@ -133,18 +133,25 @@
           "settings": {
             "collection": "jackets"
           }
+        },
+        "featured_collection_CYp4wV": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "stacked-sweats"
+          }
         }
       },
       "block_order": [
         "featured_collection_qNjWH3",
         "featured_collection_FDfH9x",
-        "featured_collection_y6n9yf"
+        "featured_collection_y6n9yf",
+        "featured_collection_CYp4wV"
       ],
       "settings": {
         "title": "Shop by Category",
         "heading_size": "h2",
         "image_ratio": "square",
-        "columns_desktop": 3,
+        "columns_desktop": 4,
         "color_scheme": "scheme-5",
         "show_view_all": false,
         "columns_mobile": "2",
