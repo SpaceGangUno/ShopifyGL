@@ -14,7 +14,7 @@ const shopify = axios.create({
   }
 });
 
-// Test with the item we know has tracking enabled
+// Test with a single product first
 const inventory = [
   { sku: '6298332', size: 'L-34', quantity: 2, title: 'Multi Cargo Pocket (Qdl-2435)' }
 ];
@@ -22,58 +22,47 @@ const inventory = [
 async function getLocationId() {
   try {
     const response = await shopify.get('/locations.json');
-    console.log('Location Response:', JSON.stringify(response.data, null, 2));
-    return response.data.locations[0].id;
+    const activeLocation = response.data.locations.find(loc => loc.active);
+    if (!activeLocation) {
+      throw new Error('No active location found');
+    }
+    return activeLocation.id;
   } catch (error) {
     console.error('Error fetching location:', error.response?.data || error.message);
     throw error;
   }
 }
 
-async function findVariantBySKU(sku) {
+async function findProductBySKU(sku) {
   try {
-    console.log(`\nSearching for variant with SKU: ${sku}`);
-    const response = await shopify.get(`/variants.json?sku=${encodeURIComponent(sku)}`);
-    console.log('Variant Response:', JSON.stringify(response.data, null, 2));
+    console.log(`\nSearching for product with SKU: ${sku}`);
     
-    if (!response.data.variants || response.data.variants.length === 0) {
-      console.log('No variant found with this SKU');
-      return null;
+    // Get all products (paginate if necessary)
+    const response = await shopify.get('/products.json?limit=250');
+    console.log(`Found ${response.data.products.length} products`);
+    
+    // Search through all variants of all products
+    for (const product of response.data.products) {
+      console.log(`\nChecking product: ${product.title}`);
+      console.log('Variants:', product.variants.map(v => ({ sku: v.sku, title: v.title })));
+      
+      const variant = product.variants.find(v => v.sku === sku);
+      if (variant) {
+        console.log('\nFound matching variant:', {
+          product_title: product.title,
+          variant_title: variant.title,
+          sku: variant.sku,
+          inventory_management: variant.inventory_management,
+          inventory_quantity: variant.inventory_quantity
+        });
+        return { product, variant };
+      }
     }
     
-    const variant = response.data.variants[0];
-    console.log('\nCurrent variant status:');
-    console.log('- Inventory management:', variant.inventory_management);
-    console.log('- Inventory policy:', variant.inventory_policy);
-    console.log('- Inventory quantity:', variant.inventory_quantity);
-    
-    return variant;
-  } catch (error) {
-    console.error(`Error finding variant with SKU ${sku}:`, error.response?.data || error.message);
+    console.log('\nNo product found with this SKU');
     return null;
-  }
-}
-
-async function getProductDetails(productId) {
-  try {
-    console.log(`\nFetching product details for ID: ${productId}`);
-    const response = await shopify.get(`/products/${productId}.json`);
-    console.log('Product Response:', JSON.stringify(response.data, null, 2));
-    return response.data.product;
   } catch (error) {
-    console.error('Error fetching product:', error.response?.data || error.message);
-    return null;
-  }
-}
-
-async function getInventoryLevel(inventoryItemId, locationId) {
-  try {
-    console.log(`\nChecking current inventory level for item ID: ${inventoryItemId}`);
-    const response = await shopify.get(`/inventory_levels.json?inventory_item_ids=${inventoryItemId}&location_ids=${locationId}`);
-    console.log('Current Inventory Level:', JSON.stringify(response.data, null, 2));
-    return response.data.inventory_levels[0];
-  } catch (error) {
-    console.error('Error checking inventory:', error.response?.data || error.message);
+    console.error('Error searching products:', error.response?.data || error.message);
     return null;
   }
 }
@@ -85,14 +74,14 @@ async function enableInventoryTracking(variantId) {
       variant: {
         id: variantId,
         inventory_management: 'shopify',
-        inventory_policy: 'deny'  // Added inventory policy
+        inventory_policy: 'deny'
       }
     });
-    console.log('Enable Tracking Response:', JSON.stringify(response.data, null, 2));
-    return true;
+    console.log('Inventory tracking enabled:', response.data.variant.inventory_management === 'shopify');
+    return response.data.variant;
   } catch (error) {
     console.error('Error enabling tracking:', error.response?.data || error.message);
-    return false;
+    return null;
   }
 }
 
@@ -107,11 +96,25 @@ async function setInventoryLevel(inventoryItemId, locationId, quantity) {
       inventory_item_id: inventoryItemId,
       available: quantity
     });
-    console.log('Set Inventory Response:', JSON.stringify(response.data, null, 2));
-    return true;
+    
+    console.log('Inventory level set:', response.data.inventory_level);
+    return response.data.inventory_level;
   } catch (error) {
     console.error('Error setting inventory:', error.response?.data || error.message);
-    return false;
+    return null;
+  }
+}
+
+async function verifyInventoryLevel(inventoryItemId, locationId) {
+  try {
+    console.log(`\nVerifying inventory level for item ID: ${inventoryItemId}`);
+    const response = await shopify.get(`/inventory_levels.json?inventory_item_ids=${inventoryItemId}&location_ids=${locationId}`);
+    const level = response.data.inventory_levels[0];
+    console.log('Current inventory level:', level ? level.available : 'unknown');
+    return level;
+  } catch (error) {
+    console.error('Error verifying inventory:', error.response?.data || error.message);
+    return null;
   }
 }
 
@@ -121,7 +124,7 @@ async function delay(ms) {
 
 async function updateInventoryLevels() {
   try {
-    console.log('=== Testing Inventory Update With Known Item ===\n');
+    console.log('=== Testing Inventory Update With Single Product ===\n');
     
     // Get location ID
     const locationId = await getLocationId();
@@ -133,29 +136,19 @@ async function updateInventoryLevels() {
       console.log(`Size: ${item.size}, Quantity: ${item.quantity}`);
 
       try {
-        // Find variant by SKU
-        const variant = await findVariantBySKU(item.sku);
-        
-        if (!variant) {
-          console.log('❌ Variant not found\n');
+        // Find product and variant by SKU
+        const result = await findProductBySKU(item.sku);
+        if (!result) {
+          console.log('❌ Product/variant not found\n');
           continue;
         }
 
-        // Get full product details
-        const product = await getProductDetails(variant.product_id);
-        if (product) {
-          console.log('\nProduct tracking settings:');
-          console.log('- Track quantity:', product.variants.some(v => v.inventory_management === 'shopify'));
-        }
-
-        // Check current inventory level
-        const currentLevel = await getInventoryLevel(variant.inventory_item_id, locationId);
-        console.log('\nCurrent inventory level:', currentLevel ? currentLevel.available : 'unknown');
+        const { product, variant } = result;
 
         // Enable inventory tracking
         console.log('\nEnabling inventory tracking...');
-        const trackingEnabled = await enableInventoryTracking(variant.id);
-        if (!trackingEnabled) {
+        const updatedVariant = await enableInventoryTracking(variant.id);
+        if (!updatedVariant) {
           console.log('❌ Failed to enable inventory tracking\n');
           continue;
         }
@@ -165,17 +158,23 @@ async function updateInventoryLevels() {
 
         // Set inventory level
         console.log('\nSetting inventory level...');
-        const success = await setInventoryLevel(variant.inventory_item_id, locationId, item.quantity);
+        const inventoryUpdate = await setInventoryLevel(variant.inventory_item_id, locationId, item.quantity);
         
-        if (success) {
-          // Verify the change
+        if (inventoryUpdate) {
+          // Verify the inventory level was set correctly
           await delay(1000);
-          const newLevel = await getInventoryLevel(variant.inventory_item_id, locationId);
-          console.log('\nNew inventory level:', newLevel ? newLevel.available : 'unknown');
+          const verification = await verifyInventoryLevel(variant.inventory_item_id, locationId);
+          
+          if (verification && verification.available === item.quantity) {
+            console.log('✓ Update completed and verified successfully\n');
+          } else {
+            console.log('❌ Update completed but verification failed\n');
+            console.log('Expected quantity:', item.quantity);
+            console.log('Actual quantity:', verification ? verification.available : 'unknown');
+          }
+        } else {
+          console.log('❌ Failed to update inventory\n');
         }
-
-        // Wait between operations
-        await delay(1000);
 
       } catch (error) {
         console.error(`Error processing ${item.title}:`, error.message);
