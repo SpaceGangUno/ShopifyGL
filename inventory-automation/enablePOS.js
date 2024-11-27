@@ -16,8 +16,16 @@ const shopify = axios.create({
 
 async function getAllCollections() {
   try {
-    const response = await shopify.get('/smart_collections.json');
-    return response.data.smart_collections;
+    // Get both smart collections and custom collections
+    const [smartResponse, customResponse] = await Promise.all([
+      shopify.get('/smart_collections.json'),
+      shopify.get('/custom_collections.json')
+    ]);
+
+    return [
+      ...smartResponse.data.smart_collections,
+      ...customResponse.data.custom_collections
+    ];
   } catch (error) {
     console.error('Error fetching collections:', error.response?.data || error.message);
     throw error;
@@ -65,14 +73,11 @@ async function enablePOSForCollection() {
     console.log('Available collections:');
     collections.forEach(c => console.log(`- ${c.title} (ID: ${c.id})`));
 
-    // Find the Black Friday collection
-    const collection = collections.find(c => 
-      c.title.toLowerCase().includes('black friday') || 
-      c.title.toLowerCase().includes('custom black')
-    );
+    // Find the Custom Black Friday collection
+    const collection = collections.find(c => c.title === 'Custom Black Friday');
 
     if (!collection) {
-      throw new Error('Black Friday collection not found');
+      throw new Error('Custom Black Friday collection not found');
     }
 
     console.log(`\nFound collection: ${collection.title} (ID: ${collection.id})`);
