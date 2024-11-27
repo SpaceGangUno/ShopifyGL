@@ -153,6 +153,9 @@ async function main() {
     console.log('Fetching all products...');
     const products = await getAllProducts();
     
+    // Reverse the products array to process from end to beginning
+    products.reverse();
+    
     const results = {
       success: [],
       failed: [],
@@ -165,9 +168,10 @@ async function main() {
       const batch = products.slice(i, i + batchSize);
       await processBatch(batch, results);
       
-      // Print progress
+      // Print progress (showing remaining products)
+      const remaining = products.length - (i + batchSize);
       const progress = ((i + batchSize) / products.length * 100).toFixed(1);
-      console.log(`\nProgress: ${progress}% (${i + batchSize}/${products.length} products)`);
+      console.log(`\nProgress: ${progress}% (${remaining} products remaining)`);
       
       // Short delay between batches
       await sleep(2000);
