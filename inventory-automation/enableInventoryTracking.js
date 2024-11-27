@@ -18,24 +18,25 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function enableTrackingForProduct(productId) {
+async function enableTrackingForProduct(product) {
   try {
-    console.log(`\nEnabling tracking for product ${productId}...`);
-    
-    // Step 1: Get current product data
-    await sleep(10000); // Wait before starting
-    const productResponse = await shopify.get(`/products/${productId}.json`);
-    const product = productResponse.data.product;
-    
-    console.log(`Product: ${product.title}`);
+    console.log(`\nEnabling tracking for product: ${product.title}`);
+    console.log(`Product ID: ${product.id}`);
     console.log(`Variants: ${product.variants.length}`);
     
-    await sleep(10000); // Wait before update
+    // Check if tracking is already enabled for all variants
+    const allEnabled = product.variants.every(v => v.inventory_management === 'shopify');
+    if (allEnabled) {
+      console.log('✓ Inventory tracking already enabled');
+      return true;
+    }
     
-    // Step 2: Update product to enable tracking
-    await shopify.put(`/products/${productId}.json`, {
+    await sleep(1000); // Shorter delay
+    
+    // Update product to enable tracking for all variants
+    await shopify.put(`/products/${product.id}.json`, {
       product: {
-        id: productId,
+        id: product.id,
         variants: product.variants.map(v => ({
           id: v.id,
           inventory_management: 'shopify',
@@ -47,14 +48,14 @@ async function enableTrackingForProduct(productId) {
       }
     });
     
-    await sleep(10000); // Wait before verification
+    await sleep(1000); // Shorter delay
     
-    // Step 3: Verify tracking is enabled
-    const verifyResponse = await shopify.get(`/products/${productId}.json`);
+    // Verify tracking is enabled
+    const verifyResponse = await shopify.get(`/products/${product.id}.json`);
     const verifiedProduct = verifyResponse.data.product;
     
-    const allEnabled = verifiedProduct.variants.every(v => v.inventory_management === 'shopify');
-    if (allEnabled) {
+    const verifyEnabled = verifiedProduct.variants.every(v => v.inventory_management === 'shopify');
+    if (verifyEnabled) {
       console.log('✓ Inventory tracking enabled successfully');
       return true;
     } else {
@@ -63,6 +64,13 @@ async function enableTrackingForProduct(productId) {
     }
     
   } catch (error) {
+    if (error.response?.status === 429) {
+      // If rate limited, wait and retry
+      console.log('Rate limited, waiting 10 seconds...');
+      await sleep(10000);
+      return enableTrackingForProduct(product);
+    }
+    
     if (error.response?.data) {
       console.error('Error enabling tracking:', JSON.stringify(error.response.data, null, 2));
     } else {
@@ -72,91 +80,115 @@ async function enableTrackingForProduct(productId) {
   }
 }
 
-async function findProductBySKU(sku) {
-  try {
-    console.log(`\nLooking up product for SKU: ${sku}`);
-    
-    let cursor = null;
-    let found = false;
-    
-    do {
-      await sleep(10000); // Wait between requests
-      
-      let queryParams = 'limit=250';
-      if (cursor) queryParams += `&page_info=${cursor}`;
-      
-      const response = await shopify.get(`/products.json?${queryParams}`);
-      
-      for (const product of response.data.products) {
-        const matchingVariant = product.variants.find(v => v.sku === sku);
-        if (matchingVariant) {
-          console.log('Found product:', product.title);
-          return product;
-        }
-      }
-      
-      const linkHeader = response.headers['link'];
-      cursor = linkHeader ? linkHeader.match(/<[^>]*page_info=([^&>]*)[^>]*>; rel="next"/)?.[1] : null;
-      
-    } while (cursor && !found);
-    
-    console.log('No product found with this SKU');
-    return null;
-    
-  } catch (error) {
-    console.error('Error finding product:', error.message);
-    return null;
-  }
-}
-
-async function main() {
-  // List of remaining SKUs that need inventory tracking enabled
-  const skus = [
-    // Racing sweat pants
-    '5388948', '268560W', 'Q949129', '120429Z', '8848660',
-    'G378160', '7275675', 'Q547175', '504175X', 'N590715',
-    
-    // Problems oversized tee
-    'B888573', 'E736137', 'A511849', '482380P', '9926314', '961869M'
-  ];
+async function getAllProducts() {
+  const products = [];
+  let hasNextPage = true;
+  let nextPageToken = null;
   
-  const processedProducts = new Set();
-  const results = {
-    success: [],
-    failed: []
-  };
-  
-  // Process one SKU at a time with long delays
-  for (const sku of skus) {
+  while (hasNextPage) {
     try {
-      const product = await findProductBySKU(sku);
+      await sleep(1000); // Shorter delay
       
-      if (product && !processedProducts.has(product.id)) {
-        processedProducts.add(product.id);
-        
-        const success = await enableTrackingForProduct(product.id);
-        if (success) {
-          results.success.push(product.title);
-        } else {
-          results.failed.push(product.title);
-        }
-        
-        await sleep(20000); // Long delay between products
+      let url = '/products.json?limit=250';
+      if (nextPageToken) {
+        url += `&page_info=${nextPageToken}`;
       }
+      
+      const response = await shopify.get(url);
+      
+      // Add products to our list
+      products.push(...response.data.products);
+      
+      // Check if there's another page
+      const linkHeader = response.headers['link'];
+      const nextPageMatch = linkHeader ? linkHeader.match(/<[^>]*page_info=([^&>]*)[^>]*>; rel="next"/) : null;
+      
+      if (nextPageMatch) {
+        nextPageToken = nextPageMatch[1];
+        console.log(`Found ${products.length} products so far, fetching next page...`);
+      } else {
+        hasNextPage = false;
+        console.log(`Found total of ${products.length} products`);
+      }
+      
     } catch (error) {
-      console.error(`Error processing SKU ${sku}:`, error.message);
-      continue;
+      if (error.response?.status === 429) {
+        // If rate limited, wait and retry
+        console.log('Rate limited while fetching products, waiting 10 seconds...');
+        await sleep(10000);
+        continue;
+      }
+      console.error('Error fetching products:', error.message);
+      hasNextPage = false;
     }
   }
   
-  // Print summary
-  console.log('\n=== Summary ===');
-  console.log(`\nSuccessfully enabled tracking for ${results.success.length} products:`);
-  results.success.forEach(title => console.log(`✓ ${title}`));
+  return products;
+}
+
+async function processBatch(products, results) {
+  const batchPromises = products.map(async (product) => {
+    // Check if tracking is already enabled
+    const allEnabled = product.variants.every(v => v.inventory_management === 'shopify');
+    
+    if (allEnabled) {
+      console.log(`\nSkipping ${product.title} - tracking already enabled`);
+      results.alreadyEnabled.push(product.title);
+      return;
+    }
+    
+    const success = await enableTrackingForProduct(product);
+    if (success) {
+      results.success.push(product.title);
+    } else {
+      results.failed.push(product.title);
+    }
+  });
   
-  if (results.failed.length > 0) {
-    console.log(`\nFailed to enable tracking for ${results.failed.length} products:`);
-    results.failed.forEach(title => console.log(`✗ ${title}`));
+  await Promise.all(batchPromises);
+}
+
+async function main() {
+  try {
+    console.log('Fetching all products...');
+    const products = await getAllProducts();
+    
+    const results = {
+      success: [],
+      failed: [],
+      alreadyEnabled: []
+    };
+    
+    // Process products in batches of 5
+    const batchSize = 5;
+    for (let i = 0; i < products.length; i += batchSize) {
+      const batch = products.slice(i, i + batchSize);
+      await processBatch(batch, results);
+      
+      // Print progress
+      const progress = ((i + batchSize) / products.length * 100).toFixed(1);
+      console.log(`\nProgress: ${progress}% (${i + batchSize}/${products.length} products)`);
+      
+      // Short delay between batches
+      await sleep(2000);
+    }
+    
+    // Print summary
+    console.log('\n=== Summary ===');
+    
+    console.log(`\nSuccessfully enabled tracking for ${results.success.length} products:`);
+    results.success.forEach(title => console.log(`✓ ${title}`));
+    
+    console.log(`\nTracking already enabled for ${results.alreadyEnabled.length} products:`);
+    results.alreadyEnabled.forEach(title => console.log(`• ${title}`));
+    
+    if (results.failed.length > 0) {
+      console.log(`\nFailed to enable tracking for ${results.failed.length} products:`);
+      results.failed.forEach(title => console.log(`✗ ${title}`));
+    }
+    
+  } catch (error) {
+    console.error('Error in main process:', error.message);
   }
 }
 
