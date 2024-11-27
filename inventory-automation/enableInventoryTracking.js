@@ -23,11 +23,14 @@ async function enableTrackingForProduct(productId) {
     console.log(`\nEnabling tracking for product ${productId}...`);
     
     // Step 1: Get current product data
+    await sleep(10000); // Wait before starting
     const productResponse = await shopify.get(`/products/${productId}.json`);
     const product = productResponse.data.product;
     
     console.log(`Product: ${product.title}`);
     console.log(`Variants: ${product.variants.length}`);
+    
+    await sleep(10000); // Wait before update
     
     // Step 2: Update product to enable tracking
     await shopify.put(`/products/${productId}.json`, {
@@ -35,18 +38,22 @@ async function enableTrackingForProduct(productId) {
         id: productId,
         variants: product.variants.map(v => ({
           id: v.id,
-          inventory_management: 'shopify'
+          inventory_management: 'shopify',
+          inventory_policy: 'deny',
+          inventory_quantity: v.inventory_quantity || 0,
+          requires_shipping: true,
+          fulfillment_service: 'manual'
         }))
       }
     });
     
-    await sleep(2000);
+    await sleep(10000); // Wait before verification
     
     // Step 3: Verify tracking is enabled
     const verifyResponse = await shopify.get(`/products/${productId}.json`);
-    const updatedProduct = verifyResponse.data.product;
+    const verifiedProduct = verifyResponse.data.product;
     
-    const allEnabled = updatedProduct.variants.every(v => v.inventory_management === 'shopify');
+    const allEnabled = verifiedProduct.variants.every(v => v.inventory_management === 'shopify');
     if (allEnabled) {
       console.log('✓ Inventory tracking enabled successfully');
       return true;
@@ -73,7 +80,7 @@ async function findProductBySKU(sku) {
     let found = false;
     
     do {
-      await sleep(500);
+      await sleep(10000); // Wait between requests
       
       let queryParams = 'limit=250';
       if (cursor) queryParams += `&page_info=${cursor}`;
@@ -103,10 +110,14 @@ async function findProductBySKU(sku) {
 }
 
 async function main() {
-  // Get list of SKUs from your previous script
+  // List of remaining SKUs that need inventory tracking enabled
   const skus = [
-    '7148503', '6185790', '209386S', '9641264', '7874284', '593221J',
-    // ... add more SKUs here
+    // Racing sweat pants
+    '5388948', '268560W', 'Q949129', '120429Z', '8848660',
+    'G378160', '7275675', 'Q547175', '504175X', 'N590715',
+    
+    // Problems oversized tee
+    'B888573', 'E736137', 'A511849', '482380P', '9926314', '961869M'
   ];
   
   const processedProducts = new Set();
@@ -115,6 +126,7 @@ async function main() {
     failed: []
   };
   
+  // Process one SKU at a time with long delays
   for (const sku of skus) {
     try {
       const product = await findProductBySKU(sku);
@@ -129,7 +141,7 @@ async function main() {
           results.failed.push(product.title);
         }
         
-        await sleep(2000);
+        await sleep(20000); // Long delay between products
       }
     } catch (error) {
       console.error(`Error processing SKU ${sku}:`, error.message);
