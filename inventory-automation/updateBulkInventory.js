@@ -14,40 +14,32 @@ const shopify = axios.create({
   }
 });
 
-// The variants we need to update
+// The variants we need to update with their sizes
 const variantSizes = [
-  { size: 'S-30', quantity: 2 },
-  { size: 'M-32', quantity: 2 },
-  { size: 'L-34', quantity: 2 },
-  { size: 'XL-36', quantity: 2 },
-  { size: 'XXL-38', quantity: 2 },
-  { size: 'XXXL-40', quantity: 2 },
-  { size: 'XXXXL-42', quantity: 2 }
+  { size: 'S-30', sku: '9567483', quantity: 2 },
+  { size: 'M-32', sku: '247856C', quantity: 2 },
+  { size: 'L-34', sku: '6298332', quantity: 2 },
+  { size: 'XL-36', sku: '628638R', quantity: 2 },
+  { size: 'XXL-38', sku: '7424606', quantity: 2 },
+  { size: 'XXXL-40', sku: '5175842', quantity: 2 },
+  { size: 'XXXXL-42', sku: '835811O', quantity: 2 }
 ];
-
-async function getLocationId() {
-  try {
-    const response = await shopify.get('/locations.json');
-    const activeLocation = response.data.locations.find(loc => loc.active);
-    if (!activeLocation) {
-      throw new Error('No active location found');
-    }
-    return activeLocation.id;
-  } catch (error) {
-    console.error('Error fetching location:', error.response?.data || error.message);
-    throw error;
-  }
-}
 
 async function searchProducts() {
   try {
-    console.log('\nSearching for products...');
-    const response = await shopify.get('/products.json?limit=250');
+    console.log('\nSearching for products containing "Multi Cargo Pocket"...');
+    const response = await shopify.get('/products/search.json?query=Multi+Cargo+Pocket');
+    console.log('Search Response:', JSON.stringify(response.data, null, 2));
     
-    // Log all products and their variants to help identify the correct one
-    console.log('\nAll Products:');
+    if (!response.data.products || response.data.products.length === 0) {
+      console.log('No products found with this name');
+      return null;
+    }
+    
+    // Log all found products and their variants
     response.data.products.forEach(product => {
-      console.log(`\nProduct: ${product.title}`);
+      console.log(`\nFound product: ${product.title}`);
+      console.log('Product ID:', product.id);
       console.log('Variants:');
       product.variants.forEach(variant => {
         console.log(`- Title: ${variant.title}`);
@@ -60,83 +52,9 @@ async function searchProducts() {
     return response.data.products;
   } catch (error) {
     console.error('Error searching products:', error.response?.data || error.message);
-    return [];
-  }
-}
-
-async function enableInventoryTracking(variantId) {
-  try {
-    console.log(`\nEnabling inventory tracking for variant ID: ${variantId}`);
-    const response = await shopify.put(`/variants/${variantId}.json`, {
-      variant: {
-        id: variantId,
-        inventory_management: 'shopify',
-        inventory_policy: 'deny'
-      }
-    });
-    console.log('Inventory tracking enabled:', response.data.variant.inventory_management === 'shopify');
-    return response.data.variant;
-  } catch (error) {
-    console.error('Error enabling tracking:', error.response?.data || error.message);
     return null;
   }
 }
 
-async function setInventoryLevel(inventoryItemId, locationId, quantity) {
-  try {
-    console.log(`\nSetting inventory level for item ID: ${inventoryItemId}`);
-    console.log(`Location ID: ${locationId}`);
-    console.log(`Quantity: ${quantity}`);
-    
-    const response = await shopify.post('/inventory_levels/set.json', {
-      location_id: locationId,
-      inventory_item_id: inventoryItemId,
-      available: quantity
-    });
-    
-    console.log('Inventory level set:', response.data.inventory_level);
-    return response.data.inventory_level;
-  } catch (error) {
-    console.error('Error setting inventory:', error.response?.data || error.message);
-    return null;
-  }
-}
-
-async function verifyInventoryLevel(inventoryItemId, locationId) {
-  try {
-    console.log(`\nVerifying inventory level for item ID: ${inventoryItemId}`);
-    const response = await shopify.get(`/inventory_levels.json?inventory_item_ids=${inventoryItemId}&location_ids=${locationId}`);
-    const level = response.data.inventory_levels[0];
-    console.log('Current inventory level:', level ? level.available : 'unknown');
-    return level;
-  } catch (error) {
-    console.error('Error verifying inventory:', error.response?.data || error.message);
-    return null;
-  }
-}
-
-async function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function updateInventoryLevels() {
-  try {
-    console.log('=== Listing All Products and Variants ===\n');
-    
-    // Get location ID
-    const locationId = await getLocationId();
-    console.log(`Using location ID: ${locationId}\n`);
-
-    // Get all products first
-    const products = await searchProducts();
-    
-    console.log('\nPlease check the product list above and provide the correct product ID to update.');
-
-  } catch (error) {
-    console.error('\n❌ Error in process:', error.message);
-    process.exit(1);
-  }
-}
-
-// Start the process
-updateInventoryLevels();
+// Start the search process
+searchProducts();
