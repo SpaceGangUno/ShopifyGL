@@ -145,47 +145,48 @@ async function processBatch(items) {
 
 // Next batch of inventory data
 const inventoryData = [
-  { sku: "908960X", quantity: 0 },
-  { sku: "V937953", quantity: 0 },
-  { sku: "K306863", quantity: 3 },
-  { sku: "500258Q", quantity: 3 },
-  { sku: "589436Z", quantity: 2 },
-  { sku: "L724072", quantity: 0 },
-  { sku: "725431C", quantity: 1 },
-  { sku: "581380S", quantity: 0 },
-  { sku: "5152176", quantity: 1 },
-  { sku: "C380211", quantity: 0 },
-  { sku: "502811S", quantity: 1 },
-  { sku: "983230T", quantity: 0 },
-  { sku: "867947G", quantity: 0 },
-  { sku: "487955C", quantity: 1 },
-  { sku: "1908644", quantity: 3 },
-  { sku: "950073P", quantity: 3 },
-  { sku: "K471710", quantity: 0 },
-  { sku: "3174942", quantity: 0 },
-  { sku: "432480C", quantity: 0 },
-  { sku: "890365F", quantity: 1 },
-  { sku: "475995S", quantity: 3 },
-  { sku: "R788046", quantity: 2 },
-  { sku: "R141623", quantity: 2 },
-  { sku: "760271J", quantity: 0 },
-  { sku: "9732870", quantity: 0 },
-  { sku: "F999623", quantity: 0 },
-  { sku: "8121091", quantity: 2 },
-  { sku: "578389K", quantity: 2 },
-  { sku: "7480180", quantity: 1 },
-  { sku: "336612M", quantity: 0 },
-  { sku: "263431R", quantity: 0 },
-  { sku: "629606Q", quantity: 1 },
-  { sku: "Q694596", quantity: 3 },
-  { sku: "729151E", quantity: 3 },
-  { sku: "2907434", quantity: 3 }
+  { sku: "580752T", quantity: 1 },
+  { sku: "284213D", quantity: 1 },
+  { sku: "477357Y", quantity: 1 },
+  { sku: "P862692", quantity: 0 },
+  { sku: "2239253", quantity: 0 },
+  { sku: "801384E", quantity: 0 },
+  { sku: "579000Y", quantity: 2 },
+  { sku: "538864V", quantity: 2 },
+  { sku: "6542867", quantity: 3 },
+  { sku: "1609692", quantity: 2 },
+  { sku: "T009021", quantity: 1 },
+  { sku: "4289121", quantity: 0 },
+  { sku: "418064Q", quantity: 1 },
+  { sku: "666285Z", quantity: 3 },
+  { sku: "J840368", quantity: 1 },
+  { sku: "9922838", quantity: 4 },
+  { sku: "5325688", quantity: 0 },
+  { sku: "6621773", quantity: 1 },
+  { sku: "841105L", quantity: 1 },
+  { sku: "386730B", quantity: 1 },
+  { sku: "8658277", quantity: 1 },
+  { sku: "9372", quantity: 0 },
+  { sku: "9373", quantity: 1 },
+  { sku: "9374", quantity: 0 },
+  { sku: "9375", quantity: 0 },
+  { sku: "813982Z", quantity: 0 },
+  { sku: "806781F", quantity: 2 },
+  { sku: "984135E", quantity: 0 },
+  { sku: "E822405", quantity: 1 },
+  { sku: "A595296", quantity: 0 },
+  { sku: "2512185", quantity: 1 },
+  { sku: "5767240", quantity: 1 },
+  { sku: "958966D", quantity: 1 },
+  { sku: "2541053", quantity: 1 },
+  { sku: "522717L", quantity: 0 }
 ];
 
 async function main() {
   console.log('Starting bulk inventory update...');
   
-  const processedSKUs = loadProgress();
+  // Clear previous progress
+  const processedSKUs = {};
   
   // Get remaining SKUs to process
   const remainingSKUs = inventoryData.filter(item => !processedSKUs[item.sku]);
@@ -215,9 +216,9 @@ async function main() {
     const totalSuccessful = Object.values(processedSKUs).filter(v => v).length;
     const totalFailed = Object.values(processedSKUs).filter(v => !v).length;
     
-    console.log(`\nOverall Progress: ${(totalProcessed / inventoryData.length * 100).toFixed(1)}%`);
-    console.log(`Total Updated: ${totalSuccessful}`);
-    console.log(`Total Failed: ${totalFailed}`);
+    console.log(`\nProgress: ${(totalProcessed / inventoryData.length * 100).toFixed(1)}%`);
+    console.log(`Updated: ${totalSuccessful}`);
+    console.log(`Failed: ${totalFailed}`);
     console.log(`Remaining: ${inventoryData.length - totalProcessed}`);
     
     // Take a break between batches
