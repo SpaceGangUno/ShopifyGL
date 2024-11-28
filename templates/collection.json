@@ -27,6 +27,7 @@
     },
     "banner": {
       "type": "main-collection-banner",
+      "disabled": true,
       "custom_css": [
         ".collection-hero__title {text-align: center !important; width: 100% !important; margin: 0 auto !important;}",
         ".collection-hero__text-wrapper {display: flex !important; justify-content: center !important;}"
