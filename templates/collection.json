@@ -24,7 +24,7 @@
     "product-grid": {
       "type": "main-collection-product-grid",
       "custom_css": [
-        ".button {background: black !important; color: white !important}"
+        ".button {background: black !important; color: white !important;}"
       ],
       "settings": {
         "products_per_page": 36,
@@ -37,7 +37,7 @@
         "show_rating": false,
         "quick_add": "standard",
         "enable_filtering": true,
-        "filter_type": "horizontal",
+        "filter_type": "vertical",
         "enable_sorting": true,
         "columns_mobile": "2",
         "padding_top": 0,
