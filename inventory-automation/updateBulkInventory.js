@@ -1,6 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
+const skuData = require('./sku_data.js');
 
 if (!process.env.SHOPIFY_ACCESS_TOKEN || !process.env.SHOPIFY_SHOP_DOMAIN) {
   console.error('Error: Required environment variables are missing.');
@@ -17,23 +18,6 @@ const shopify = axios.create({
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Save progress to a file
-function saveProgress(processedSKUs) {
-  fs.writeFileSync('inventory_progress.json', JSON.stringify(processedSKUs, null, 2));
-}
-
-// Load progress from file
-function loadProgress() {
-  try {
-    if (fs.existsSync('inventory_progress.json')) {
-      return JSON.parse(fs.readFileSync('inventory_progress.json', 'utf8'));
-    }
-  } catch (error) {
-    console.error('Error loading progress file:', error);
-  }
-  return {};
 }
 
 async function retryWithBackoff(fn, maxRetries = 3) {
@@ -143,97 +127,65 @@ async function processBatch(items) {
   return results;
 }
 
-// Next batch of inventory data
-const inventoryData = [
-  { sku: "580752T", quantity: 1 },
-  { sku: "284213D", quantity: 1 },
-  { sku: "477357Y", quantity: 1 },
-  { sku: "P862692", quantity: 0 },
-  { sku: "2239253", quantity: 0 },
-  { sku: "801384E", quantity: 0 },
-  { sku: "579000Y", quantity: 2 },
-  { sku: "538864V", quantity: 2 },
-  { sku: "6542867", quantity: 3 },
-  { sku: "1609692", quantity: 2 },
-  { sku: "T009021", quantity: 1 },
-  { sku: "4289121", quantity: 0 },
-  { sku: "418064Q", quantity: 1 },
-  { sku: "666285Z", quantity: 3 },
-  { sku: "J840368", quantity: 1 },
-  { sku: "9922838", quantity: 4 },
-  { sku: "5325688", quantity: 0 },
-  { sku: "6621773", quantity: 1 },
-  { sku: "841105L", quantity: 1 },
-  { sku: "386730B", quantity: 1 },
-  { sku: "8658277", quantity: 1 },
-  { sku: "9372", quantity: 0 },
-  { sku: "9373", quantity: 1 },
-  { sku: "9374", quantity: 0 },
-  { sku: "9375", quantity: 0 },
-  { sku: "813982Z", quantity: 0 },
-  { sku: "806781F", quantity: 2 },
-  { sku: "984135E", quantity: 0 },
-  { sku: "E822405", quantity: 1 },
-  { sku: "A595296", quantity: 0 },
-  { sku: "2512185", quantity: 1 },
-  { sku: "5767240", quantity: 1 },
-  { sku: "958966D", quantity: 1 },
-  { sku: "2541053", quantity: 1 },
-  { sku: "522717L", quantity: 0 }
-];
+// Parse the raw SKU data
+function parseSkuData(rawData) {
+  return rawData
+    .split('\n')
+    .map(line => {
+      const [sku, quantity] = line.trim().split('\t');
+      if (!sku || sku === '') return null;
+      return {
+        sku,
+        quantity: parseInt(quantity) || 0
+      };
+    })
+    .filter(item => item !== null);
+}
 
 async function main() {
   console.log('Starting bulk inventory update...');
   
-  // Clear previous progress
-  const processedSKUs = {};
+  // Parse the SKU data
+  const inventoryData = parseSkuData(skuData);
   
-  // Get remaining SKUs to process
-  const remainingSKUs = inventoryData.filter(item => !processedSKUs[item.sku]);
-  
-  console.log(`Found ${remainingSKUs.length} SKUs to process`);
-  console.log(`Previously processed: ${Object.keys(processedSKUs).length} SKUs`);
+  console.log(`Found ${inventoryData.length} SKUs to process`);
   
   // Process in small batches
   const batchSize = 5;
-  for (let i = 0; i < remainingSKUs.length; i += batchSize) {
-    const batch = remainingSKUs.slice(i, i + batchSize);
+  let totalProcessed = 0;
+  let totalSuccessful = 0;
+  let totalFailed = 0;
+  
+  for (let i = 0; i < inventoryData.length; i += batchSize) {
+    const batch = inventoryData.slice(i, i + batchSize);
     
-    console.log(`\nProcessing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(remainingSKUs.length/batchSize)}`);
+    console.log(`\nProcessing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(inventoryData.length/batchSize)}`);
     
     const results = await processBatch(batch);
     
-    // Update progress
-    results.forEach(({ sku, success }) => {
-      processedSKUs[sku] = success;
-    });
+    // Update totals
+    totalProcessed += results.length;
+    totalSuccessful += results.filter(r => r.success).length;
+    totalFailed += results.filter(r => !r.success).length;
     
-    // Save progress after each batch
-    saveProgress(processedSKUs);
-    
-    // Calculate overall progress
-    const totalProcessed = Object.keys(processedSKUs).length;
-    const totalSuccessful = Object.values(processedSKUs).filter(v => v).length;
-    const totalFailed = Object.values(processedSKUs).filter(v => !v).length;
-    
-    console.log(`\nProgress: ${(totalProcessed / inventoryData.length * 100).toFixed(1)}%`);
+    // Calculate progress
+    const progress = (totalProcessed / inventoryData.length * 100).toFixed(1);
+    console.log(`\nProgress: ${progress}%`);
     console.log(`Updated: ${totalSuccessful}`);
     console.log(`Failed: ${totalFailed}`);
     console.log(`Remaining: ${inventoryData.length - totalProcessed}`);
     
     // Take a break between batches
-    if (i + batchSize < remainingSKUs.length) {
+    if (i + batchSize < inventoryData.length) {
       console.log('\nTaking a break between batches...');
       await sleep(30000); // 30 second break between batches
     }
   }
   
   console.log('\n=== Final Summary ===');
-  const finalSuccessful = Object.values(processedSKUs).filter(v => v).length;
-  const finalFailed = Object.values(processedSKUs).filter(v => !v).length;
-  console.log(`Successfully updated: ${finalSuccessful} products`);
-  console.log(`Failed to update: ${finalFailed} products`);
-  console.log(`Total processed: ${Object.keys(processedSKUs).length} out of ${inventoryData.length}`);
+  console.log(`Successfully updated: ${totalSuccessful} products`);
+  console.log(`Failed to update: ${totalFailed} products`);
+  console.log(`Total processed: ${totalProcessed} out of ${inventoryData.length}`);
 }
 
 main().catch(console.error);
