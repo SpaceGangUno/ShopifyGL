@@ -123,50 +123,72 @@ async function updateInventory(sku, quantity) {
 async function processBatch(items) {
   const results = [];
   
-  for (const [sku, quantity] of items) {
+  for (const item of items) {
     try {
       // Wait 15 seconds between operations
       await sleep(15000);
-      const success = await updateInventory(sku, quantity);
-      results.push({ sku, success });
+      const success = await updateInventory(item.sku, item.quantity);
+      results.push({ sku: item.sku, success });
     } catch (error) {
       if (error.response && error.response.status === 429) {
         console.log('Rate limit reached. Taking a longer break...');
         await sleep(60000); // Wait 1 minute before retrying
-        // Retry this SKU by decrementing the loop counter
+        // Retry this SKU
         continue;
       }
-      results.push({ sku, success: false });
+      results.push({ sku: item.sku, success: false });
     }
   }
   
   return results;
 }
 
-// Load and parse inventory data from raw file
-function loadInventoryData() {
-  const data = fs.readFileSync('raw_inventory_data.txt', 'utf8');
-  const inventoryData = new Map();
-  
-  data.split('\n').forEach(line => {
-    const [sku, quantityStr] = line.trim().split('\t');
-    if (sku && quantityStr !== undefined) {
-      inventoryData.set(sku, parseInt(quantityStr) || 0);
-    }
-  });
-  
-  return inventoryData;
-}
+// Next batch of inventory data
+const inventoryData = [
+  { sku: "908960X", quantity: 0 },
+  { sku: "V937953", quantity: 0 },
+  { sku: "K306863", quantity: 3 },
+  { sku: "500258Q", quantity: 3 },
+  { sku: "589436Z", quantity: 2 },
+  { sku: "L724072", quantity: 0 },
+  { sku: "725431C", quantity: 1 },
+  { sku: "581380S", quantity: 0 },
+  { sku: "5152176", quantity: 1 },
+  { sku: "C380211", quantity: 0 },
+  { sku: "502811S", quantity: 1 },
+  { sku: "983230T", quantity: 0 },
+  { sku: "867947G", quantity: 0 },
+  { sku: "487955C", quantity: 1 },
+  { sku: "1908644", quantity: 3 },
+  { sku: "950073P", quantity: 3 },
+  { sku: "K471710", quantity: 0 },
+  { sku: "3174942", quantity: 0 },
+  { sku: "432480C", quantity: 0 },
+  { sku: "890365F", quantity: 1 },
+  { sku: "475995S", quantity: 3 },
+  { sku: "R788046", quantity: 2 },
+  { sku: "R141623", quantity: 2 },
+  { sku: "760271J", quantity: 0 },
+  { sku: "9732870", quantity: 0 },
+  { sku: "F999623", quantity: 0 },
+  { sku: "8121091", quantity: 2 },
+  { sku: "578389K", quantity: 2 },
+  { sku: "7480180", quantity: 1 },
+  { sku: "336612M", quantity: 0 },
+  { sku: "263431R", quantity: 0 },
+  { sku: "629606Q", quantity: 1 },
+  { sku: "Q694596", quantity: 3 },
+  { sku: "729151E", quantity: 3 },
+  { sku: "2907434", quantity: 3 }
+];
 
 async function main() {
   console.log('Starting bulk inventory update...');
   
-  const inventoryData = loadInventoryData();
   const processedSKUs = loadProgress();
   
   // Get remaining SKUs to process
-  const remainingSKUs = Array.from(inventoryData.entries())
-    .filter(([sku]) => !processedSKUs[sku]);
+  const remainingSKUs = inventoryData.filter(item => !processedSKUs[item.sku]);
   
   console.log(`Found ${remainingSKUs.length} SKUs to process`);
   console.log(`Previously processed: ${Object.keys(processedSKUs).length} SKUs`);
@@ -193,10 +215,10 @@ async function main() {
     const totalSuccessful = Object.values(processedSKUs).filter(v => v).length;
     const totalFailed = Object.values(processedSKUs).filter(v => !v).length;
     
-    console.log(`\nOverall Progress: ${(totalProcessed / inventoryData.size * 100).toFixed(1)}%`);
+    console.log(`\nOverall Progress: ${(totalProcessed / inventoryData.length * 100).toFixed(1)}%`);
     console.log(`Total Updated: ${totalSuccessful}`);
     console.log(`Total Failed: ${totalFailed}`);
-    console.log(`Remaining: ${inventoryData.size - totalProcessed}`);
+    console.log(`Remaining: ${inventoryData.length - totalProcessed}`);
     
     // Take a break between batches
     if (i + batchSize < remainingSKUs.length) {
@@ -210,7 +232,7 @@ async function main() {
   const finalFailed = Object.values(processedSKUs).filter(v => !v).length;
   console.log(`Successfully updated: ${finalSuccessful} products`);
   console.log(`Failed to update: ${finalFailed} products`);
-  console.log(`Total processed: ${Object.keys(processedSKUs).length} out of ${inventoryData.size}`);
+  console.log(`Total processed: ${Object.keys(processedSKUs).length} out of ${inventoryData.length}`);
 }
 
 main().catch(console.error);
