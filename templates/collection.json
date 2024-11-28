@@ -11,6 +11,7 @@
   "sections": {
     "image_banner_LHqQqT": {
       "type": "image-banner",
+      "disabled": true,
       "settings": {
         "image": "shopify://shop_images/GEAR_LOCKER_WEBSITE-07.png",
         "image_overlay_opacity": 0,
@@ -27,7 +28,6 @@
     },
     "banner": {
       "type": "main-collection-banner",
-      "disabled": true,
       "custom_css": [
         ".collection-hero__title {text-align: center !important; width: 100% !important; margin: 0 auto !important;}",
         ".collection-hero__text-wrapper {display: flex !important; justify-content: center !important;}"
