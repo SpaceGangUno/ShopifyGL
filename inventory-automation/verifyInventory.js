@@ -2,7 +2,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 const shopify = axios.create({
-  baseURL: `https://${process.env.SHOPIFY_SHOP_DOMAIN}/admin/api/2024-01`,
+  baseURL: `https://${process.env.SHOPIFY_SHOP_DOMAIN}/admin/api/2024-01/graphql.json`,
   headers: {
     'X-Shopify-Access-Token': process.env.SHOPIFY_ACCESS_TOKEN,
     'Content-Type': 'application/json'
@@ -10,14 +10,49 @@ const shopify = axios.create({
 });
 
 async function verifyInventory(sku) {
+  const query = `
+    query getVariantBySKU($query: String!) {
+      productVariants(first: 1, query: $query) {
+        edges {
+          node {
+            id
+            sku
+            inventoryItem {
+              id
+              inventoryLevels(first: 1) {
+                edges {
+                  node {
+                    id
+                    available
+                    location {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
   try {
-    const response = await shopify.get(`/variants.json?sku=${sku}`);
-    const variant = response.data.variants[0];
-    if (variant) {
-      const inventoryResponse = await shopify.get(`/inventory_levels.json?inventory_item_ids=${variant.inventory_item_id}`);
-      const level = inventoryResponse.data.inventory_levels[0];
-      console.log(`SKU: ${sku} - Current inventory: ${level.available}`);
-      return level.available;
+    const response = await shopify.post('', {
+      query,
+      variables: {
+        query: `sku:${sku}`
+      }
+    });
+
+    const variants = response.data.data.productVariants.edges;
+    if (variants.length > 0) {
+      const variant = variants[0].node;
+      const inventoryLevel = variant.inventoryItem.inventoryLevels.edges[0]?.node;
+      if (inventoryLevel) {
+        console.log(`SKU: ${sku} - Current inventory: ${inventoryLevel.available}`);
+        return inventoryLevel.available;
+      }
     }
     console.log(`SKU: ${sku} - Not found`);
     return null;
