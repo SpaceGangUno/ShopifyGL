@@ -61,7 +61,18 @@
               <div class="caption-with-letter-spacing light">{{ card_product.vendor }}</div>
             {%- endif -%}
 
-            {% render 'price', product: card_product, show_compare_at_price: true %}
+            {%- if card_product.selected_or_first_available_variant -%}
+              {% render 'price',
+                product: card_product,
+                use_variant: true,
+                show_compare_at_price: true
+              %}
+            {%- else -%}
+              {% render 'price',
+                product: card_product,
+                show_compare_at_price: true
+              %}
+            {%- endif -%}
           </div>
 
           {%- if card_product.available == false -%}
