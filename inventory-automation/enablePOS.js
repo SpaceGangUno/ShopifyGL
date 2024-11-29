@@ -14,28 +14,47 @@ const shopify = axios.create({
   }
 });
 
-async function getAllCollections() {
-  try {
-    // Get both smart collections and custom collections
-    const [smartResponse, customResponse] = await Promise.all([
-      shopify.get('/smart_collections.json'),
-      shopify.get('/custom_collections.json')
-    ]);
-
-    return [
-      ...smartResponse.data.smart_collections,
-      ...customResponse.data.custom_collections
-    ];
-  } catch (error) {
-    console.error('Error fetching collections:', error.response?.data || error.message);
-    throw error;
+const graphqlClient = axios.create({
+  baseURL: `https://${process.env.SHOPIFY_SHOP_DOMAIN}/admin/api/2024-01/graphql.json`,
+  headers: {
+    'X-Shopify-Access-Token': process.env.SHOPIFY_ACCESS_TOKEN,
+    'Content-Type': 'application/json'
   }
-}
+});
 
-async function getCollectionProducts(collectionId) {
+async function getProductsWithInventory() {
+  const query = `
+    {
+      products(first: 250) {
+        edges {
+          node {
+            id
+            title
+            variants(first: 1) {
+              edges {
+                node {
+                  inventoryQuantity
+                  inventoryManagement
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
   try {
-    const response = await shopify.get(`/collections/${collectionId}/products.json?limit=250`);
-    return response.data.products;
+    const response = await graphqlClient.post('', { query });
+    const products = response.data.data.products.edges;
+    
+    // Filter products that have inventory tracking enabled and quantity > 0
+    return products.filter(({ node: product }) => {
+      const variant = product.variants.edges[0]?.node;
+      return variant && 
+             variant.inventoryManagement === 'SHOPIFY' && 
+             variant.inventoryQuantity > 0;
+    });
   } catch (error) {
     console.error('Error fetching products:', error.response?.data || error.message);
     throw error;
@@ -52,10 +71,10 @@ async function enablePOSForProduct(productId) {
         published_at: new Date().toISOString()
       }
     });
-    console.log('✓ Enabled POS visibility');
+    return true;
   } catch (error) {
     console.error('Error enabling POS:', error.response?.data || error.message);
-    throw error;
+    return false;
   }
 }
 
@@ -63,39 +82,32 @@ async function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function enablePOSForCollection() {
+async function enablePOSForAllProducts() {
   try {
-    console.log('=== Enabling POS for Custom Black Friday Collection ===');
+    console.log('=== Enabling POS for All Products with Inventory ===');
     
-    // First get all collections
-    console.log('Fetching collections...');
-    const collections = await getAllCollections();
-    console.log('Available collections:');
-    collections.forEach(c => console.log(`- ${c.title} (ID: ${c.id})`));
-
-    // Find the Custom Black Friday collection
-    const collection = collections.find(c => c.title === 'Custom Black Friday');
-
-    if (!collection) {
-      throw new Error('Custom Black Friday collection not found');
-    }
-
-    console.log(`\nFound collection: ${collection.title} (ID: ${collection.id})`);
-
-    // Get products in collection
-    console.log('\nFetching products...');
-    const products = await getCollectionProducts(collection.id);
-    console.log(`Found ${products.length} products in collection`);
+    // Get all products with inventory
+    console.log('Fetching products with inventory...');
+    const products = await getProductsWithInventory();
+    console.log(`Found ${products.length} products with inventory`);
 
     let successCount = 0;
     let errorCount = 0;
 
     // Process each product
-    for (const product of products) {
+    for (const { node: product } of products) {
       try {
         console.log(`\nProcessing: ${product.title}`);
-        await enablePOSForProduct(product.id);
-        successCount++;
+        const productId = product.id.split('/').pop(); // Extract numeric ID from GraphQL ID
+        const success = await enablePOSForProduct(productId);
+        
+        if (success) {
+          successCount++;
+          console.log('✓ Enabled POS visibility');
+        } else {
+          errorCount++;
+          console.log('✗ Failed to enable POS');
+        }
         
         // Wait between operations to respect rate limits
         await delay(500);
@@ -118,4 +130,4 @@ async function enablePOSForCollection() {
   }
 }
 
-enablePOSForCollection();
+enablePOSForAllProducts();
