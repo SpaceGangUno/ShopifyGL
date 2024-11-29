@@ -1,51 +1,110 @@
 .price {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
   font-size: 1.6rem;
+  letter-spacing: 0.1rem;
+  line-height: calc(1 + 0.5 / var(--font-body-scale));
   color: rgb(var(--color-foreground));
 }
 
-/* Regular Price */
-.price-item--regular {
-  font-size: 1.6rem;
-  color: rgb(var(--color-foreground));
+.price > * {
+  display: inline-block;
+  vertical-align: top;
 }
 
-/* Sale Price */
-s.price-item--regular {
-  color: rgba(var(--color-foreground), 0.75);
+.price.price--unavailable {
+  visibility: hidden;
+}
+
+.price--end {
+  text-align: right;
+}
+
+.price .price-item {
+  display: inline-block;
+  margin: 0 1rem 0 0;
+}
+
+.price__regular .price-item--regular {
+  margin-right: 0;
+}
+
+.price:not(.price--show-badge) .price-item--last:last-of-type {
+  margin: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .price {
+    margin-bottom: 0;
+  }
+}
+
+.price--large {
+  font-size: 1.6rem;
+  line-height: calc(1 + 0.5 / var(--font-body-scale));
+  letter-spacing: 0.13rem;
+}
+
+@media screen and (min-width: 750px) {
+  .price--large {
+    font-size: 1.8rem;
+  }
+}
+
+.price--sold-out .price__availability,
+.price__regular {
+  display: block;
+}
+
+.price__sale,
+.price__availability,
+.price .price__badge-sale,
+.price .price__badge-sold-out,
+.price--on-sale .price__regular,
+.price--on-sale .price__availability {
+  display: none;
+}
+
+.price--sold-out .price__badge-sold-out,
+.price--on-sale .price__badge-sale {
+  display: inline-block;
+}
+
+.price--on-sale .price__sale {
+  display: initial;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.price--center {
+  display: initial;
+  justify-content: center;
+}
+
+.price--on-sale .price-item--regular {
   text-decoration: line-through;
+  color: rgba(var(--color-foreground), 0.75);
+  font-size: 1.4rem;
 }
 
-.price-item--sale {
-  color: #E31837;
-  font-weight: 700;
+.price--on-sale .price-item--sale {
+  color: rgb(var(--color-foreground));
 }
 
-/* Discount Badge */
-.price-item__discount-badge {
-  background: #E31837;
-  color: #FFFFFF;
+.price__badge-sale {
+  background: rgb(var(--color-badge));
+  color: rgb(var(--color-background));
   padding: 0.2rem 0.6rem;
   border-radius: 0.3rem;
   font-size: 1.2rem;
   font-weight: 700;
+  margin-left: 0.8rem;
 }
 
-/* Mobile Optimization */
-@media screen and (max-width: 749px) {
-  .price {
-    font-size: 1.4rem;
-  }
-
-  .price-item--regular,
-  .price-item--sale {
-    font-size: 1.4rem;
-  }
-
-  .price-item__discount-badge {
-    font-size: 1.1rem;
-    padding: 0.15rem 0.5rem;
-  }
+.price__badge-sold-out {
+  background: rgb(var(--color-badge));
+  color: rgb(var(--color-background));
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-left: 0.8rem;
 }
