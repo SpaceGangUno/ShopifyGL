@@ -126,3 +126,51 @@
   text-transform: uppercase;
   color: rgba(var(--color-foreground), 0.7);
 }
+
+/* Last Piece Styling */
+.last-piece-info {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(var(--color-foreground), 0.1);
+}
+
+.last-piece-tag {
+  display: inline-block;
+  background: #FFD700;
+  color: #000000;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.3rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.available-sizes {
+  font-size: 1.2rem;
+  color: rgba(var(--color-foreground), 0.85);
+  margin-top: 0.5rem;
+}
+
+.size-badge {
+  display: inline-block;
+  background: rgba(var(--color-foreground), 0.06);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  margin: 0.2rem;
+  font-weight: 500;
+}
+
+/* Enhanced Price Display */
+.price__container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.price__regular,
+.price__sale {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

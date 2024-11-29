@@ -1,5 +1,5 @@
 {% comment %}
-  Renders a list of product's price (regular, sale)
+  Renders a list of product's price (regular, sale) and available sizes for last piece items
 
   Accepts:
   - product: {Object} Product Liquid object (optional)
@@ -57,6 +57,12 @@
   if target == product and product.price_varies
     assign money_price = 'products.product.price.from_price_html' | t: price: money_price
   endif
+
+  # Calculate discount percentage
+  assign discount_percentage = 0
+  if compare_at_price > price
+    assign discount_percentage = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+  endif
 -%}
 
 {%- unless target == null and placeholder == null -%}
@@ -77,7 +83,7 @@
           {%- if compare_at_price > price or is_black_friday -%}
             <s class="price-item price-item--regular">{{ compare_at_price | money }}</s>
             <span class="price-item price-item--sale">{{ money_price }}</span>
-            <span class="price-item__discount-badge">40% OFF</span>
+            <span class="price-item__discount-badge">{{ discount_percentage }}% OFF</span>
           {%- else -%}
             {{ money_price }}
           {%- endif -%}
@@ -115,6 +121,20 @@
           </span>
         </span>
       </small>
+
+      {% if product.tags contains 'Last Piece' %}
+        <div class="last-piece-info">
+          <div class="last-piece-tag">Last Piece</div>
+          <div class="available-sizes">
+            Available in: 
+            {% for variant in product.variants %}
+              {% if variant.inventory_quantity > 0 %}
+                <span class="size-badge">{{ variant.title }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
     </div>
     {%- if show_badges -%}
       <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
