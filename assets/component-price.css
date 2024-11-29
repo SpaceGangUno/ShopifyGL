@@ -5,93 +5,36 @@
   color: rgb(var(--color-foreground));
 }
 
-.price > * {
-  display: inline-block;
-  vertical-align: top;
+.price__container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.price.price--unavailable {
-  visibility: hidden;
-}
-
-.price--end {
-  text-align: right;
-}
-
-.price .price-item {
-  display: inline-block;
-  margin: 0 1rem 0 0;
-}
-
-.price__regular .price-item--regular {
-  margin-right: 0;
-}
-
-.price:not(.price--show-badge) .price-item--last:last-of-type {
-  margin: 0;
-}
-
-@media screen and (min-width: 750px) {
-  .price {
-    margin-bottom: 0;
-  }
-}
-
-.price--large {
-  font-size: 1.6rem;
-  line-height: calc(1 + 0.5 / var(--font-body-scale));
-  letter-spacing: 0.13rem;
-}
-
-@media screen and (min-width: 750px) {
-  .price--large {
-    font-size: 1.8rem;
-  }
-}
-
-.price--sold-out .price__availability,
 .price__regular {
-  display: block;
-}
-
-.price__sale,
-.price__availability,
-.price .price__badge-sale,
-.price .price__badge-sold-out,
-.price--on-sale .price__regular,
-.price--on-sale .price__availability {
-  display: none;
-}
-
-.price--sold-out .price__badge-sold-out,
-.price--on-sale .price__badge-sale {
-  display: inline-block;
-}
-
-.price--on-sale .price__sale {
-  display: initial;
-  flex-direction: row;
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.price--center {
-  display: initial;
-  justify-content: center;
+/* Regular Price */
+.price-item--regular {
+  font-size: 1.6rem;
+  color: rgb(var(--color-foreground));
 }
 
 /* Sale Price Styling */
-.price--on-sale .price-item--regular {
-  text-decoration: line-through;
+s.price-item--regular {
   color: rgba(var(--color-foreground), 0.75);
-  font-size: 1.4rem;
-  display: inline-block;
-  margin-right: 1rem;
+  text-decoration: line-through;
+  font-size: 1.6rem;
 }
 
-.price--on-sale .price-item--sale {
+.price-item--sale {
   color: #E31837;
   font-weight: 700;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
 }
 
 .price-item__discount-badge {
@@ -101,35 +44,12 @@
   border-radius: 0.3rem;
   font-size: 1.2rem;
   font-weight: 700;
-  margin-left: 0.8rem;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.price .badge {
-  position: relative;
-  top: -2px;
-  padding: 0.2rem 0.6rem;
-  margin-left: 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 0.3rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.unit-price {
-  display: block;
-  font-size: 1.1rem;
-  letter-spacing: 0.04rem;
-  line-height: calc(1 + 0.2 / var(--font-body-scale));
-  margin-top: 0.2rem;
-  text-transform: uppercase;
-  color: rgba(var(--color-foreground), 0.7);
+  margin-left: 0.4rem;
 }
 
 /* Last Piece Styling */
 .last-piece-info {
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   padding-top: 0.8rem;
   border-top: 1px solid rgba(var(--color-foreground), 0.1);
 }
@@ -168,38 +88,17 @@
   letter-spacing: 0.05em;
 }
 
-/* Price Container Layout */
-.price__container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.price__regular {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
 /* Mobile Optimization */
 @media screen and (max-width: 749px) {
-  .price--on-sale .price-item--regular {
-    font-size: 1.3rem;
-  }
-
-  .price--on-sale .price-item--sale {
-    font-size: 1.6rem;
+  .price-item--regular,
+  s.price-item--regular,
+  .price-item--sale {
+    font-size: 1.4rem;
   }
 
   .price-item__discount-badge {
     font-size: 1.1rem;
     padding: 0.15rem 0.5rem;
-  }
-
-  .last-piece-info {
-    margin-top: 0.8rem;
-    padding-top: 0.6rem;
   }
 
   .last-piece-tag {

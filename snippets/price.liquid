@@ -1,16 +1,5 @@
 {% comment %}
-  Renders a list of product's price (regular, sale) and available sizes for last piece items
-
-  Accepts:
-  - product: {Object} Product Liquid object (optional)
-  - placeholder: {Boolean} Renders a placeholder price (optional)
-  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
-  - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
-  - price_class: {String} Adds a price class to the price element (optional)
-  - show_compare_at_price: {Boolean} Renders the compare at price if the product matches the condition (optional)
-
-  Usage:
-  {% render 'price', product: product %}
+  Renders a product's price with discounts and available sizes for last piece items
 {% endcomment %}
 
 {%- liquid
@@ -40,28 +29,16 @@
 -%}
 
 {%- unless target == null and placeholder == null -%}
-  <div
-    class="
-      price
-      {%- if price_class %} {{ price_class }}{% endif -%}
-      {%- if available == false %} price--sold-out{% endif -%}
-      {%- if compare_at_price > price %} price--on-sale{% endif -%}
-      {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
-      {%- if show_badges %} price--show-badge{% endif -%}
-    "
-  >
+  <div class="price{% if price_class %} {{ price_class }}{% endif %}">
     <div class="price__container">
       <div class="price__regular">
-        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-        <span class="price-item price-item--regular">
-          {%- if compare_at_price > price -%}
-            <s class="price-item price-item--regular">{{ money_compare_at_price }}</s>
-            <span class="price-item price-item--sale">{{ money_price }}</span>
-            <span class="price-item__discount-badge">{{ discount_percentage }}% OFF</span>
-          {%- else -%}
-            {{ money_price }}
-          {%- endif -%}
-        </span>
+        {%- if compare_at_price > price -%}
+          <s class="price-item price-item--regular">{{ money_compare_at_price }}</s>
+          <span class="price-item price-item--sale">{{ money_price }}</span>
+          <span class="price-item__discount-badge">-{{ discount_percentage }}%</span>
+        {%- else -%}
+          <span class="price-item price-item--regular">{{ money_price }}</span>
+        {%- endif -%}
       </div>
 
       {% if product.tags contains 'Last Piece' %}
