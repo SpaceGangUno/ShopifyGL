@@ -79,7 +79,7 @@
   justify-content: center;
 }
 
-/* Enhanced Black Friday Styling */
+/* Sale Price Styling */
 .price--on-sale .price-item--regular {
   text-decoration: line-through;
   color: rgba(var(--color-foreground), 0.75);
@@ -168,15 +168,14 @@
   letter-spacing: 0.05em;
 }
 
-/* Enhanced Price Display */
+/* Price Container Layout */
 .price__container {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.price__regular,
-.price__sale {
+.price__regular {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -185,6 +184,19 @@
 
 /* Mobile Optimization */
 @media screen and (max-width: 749px) {
+  .price--on-sale .price-item--regular {
+    font-size: 1.3rem;
+  }
+
+  .price--on-sale .price-item--sale {
+    font-size: 1.6rem;
+  }
+
+  .price-item__discount-badge {
+    font-size: 1.1rem;
+    padding: 0.15rem 0.5rem;
+  }
+
   .last-piece-info {
     margin-top: 0.8rem;
     padding-top: 0.6rem;
