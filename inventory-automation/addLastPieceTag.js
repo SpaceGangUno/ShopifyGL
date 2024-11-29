@@ -33,6 +33,7 @@ async function getProducts(cursor = null) {
             id
             title
             tags
+            status
             variants(first: 100) {
               edges {
                 node {
@@ -84,9 +85,37 @@ async function updateProductTags(productId, tags, shouldAdd) {
   }
 }
 
+async function updateProductStatus(productId, status) {
+  const mutation = `
+    mutation productUpdate {
+      productUpdate(input: {
+        id: "${productId}",
+        status: ${status}
+      }) {
+        product {
+          id
+          status
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await shopify.post('', { query: mutation });
+    return response.data.data;
+  } catch (error) {
+    console.error(`Failed to update status for product ${productId}:`, error.response?.data || error.message);
+    throw error;
+  }
+}
+
 async function processProducts() {
   try {
-    console.log('=== Shopify Last Piece Tag Update ===');
+    console.log('=== Shopify Product Status and Tag Update ===');
     console.log(`Connected to shop: ${process.env.SHOPIFY_SHOP_DOMAIN}\n`);
 
     let hasNextPage = true;
@@ -94,6 +123,8 @@ async function processProducts() {
     let processedCount = 0;
     let taggedCount = 0;
     let untaggedCount = 0;
+    let draftedCount = 0;
+    let activatedCount = 0;
     let errorCount = 0;
 
     while (hasNextPage) {
@@ -111,6 +142,18 @@ async function processProducts() {
             return sum + (variantEdge.node.inventoryQuantity || 0);
           }, 0);
 
+          // Handle status update
+          if (totalQuantity === 0 && product.status !== 'DRAFT') {
+            await updateProductStatus(product.id, 'DRAFT');
+            console.log(`✓ Set to DRAFT: ${product.title} (No inventory)`);
+            draftedCount++;
+          } else if (totalQuantity > 0 && product.status === 'DRAFT') {
+            await updateProductStatus(product.id, 'ACTIVE');
+            console.log(`✓ Set to ACTIVE: ${product.title} (Has inventory)`);
+            activatedCount++;
+          }
+
+          // Handle tag update
           const currentTags = product.tags || [];
           const hasLastPieceTag = currentTags.includes(LAST_PIECE_TAG);
           const shouldHaveTag = totalQuantity > 0 && totalQuantity <= 2;
@@ -137,10 +180,12 @@ async function processProducts() {
       }
     }
 
-    console.log('\n=== Tag Update Summary ===');
+    console.log('\n=== Update Summary ===');
     console.log(`Products processed: ${processedCount}`);
-    console.log(`Products tagged: ${taggedCount}`);
+    console.log(`Products tagged with "${LAST_PIECE_TAG}": ${taggedCount}`);
     console.log(`Tags removed: ${untaggedCount}`);
+    console.log(`Products set to DRAFT: ${draftedCount}`);
+    console.log(`Products set to ACTIVE: ${activatedCount}`);
     console.log(`Errors encountered: ${errorCount}`);
     console.log('Process completed! ✨');
 
