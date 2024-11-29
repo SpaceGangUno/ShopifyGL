@@ -57,6 +57,7 @@
       "type": "image-banner",
       "settings": {
         "image": "shopify://shop_images/GEAR_LOCKER_WEBSITE_BANNER_MYSTERY_BOX-08.png",
+        "image_2": "shopify://shop_images/GEAR_LOCKER_WEBSITE-07.png",
         "image_overlay_opacity": 0,
         "image_height": "adapt",
         "desktop_content_position": "middle-center",
