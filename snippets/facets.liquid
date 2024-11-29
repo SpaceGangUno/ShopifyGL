@@ -31,10 +31,12 @@
   assign all_sizes = ''
   for product in results.products
     for variant in product.variants
-      assign size = variant.option1 | downcase
-      unless all_sizes contains size
-        assign all_sizes = all_sizes | append: size | append: ','
-      endunless
+      if variant.available and variant.option1 != blank
+        assign size = variant.option1 | downcase
+        unless all_sizes contains size
+          assign all_sizes = all_sizes | append: size | append: ','
+        endunless
+      endif
     endfor
   endfor
   assign size_array = all_sizes | split: ','
@@ -123,6 +125,10 @@
                               {% if results.current_vendor == size %}
                                 checked
                               {% endif %}
+                            {% endif %}
+                            {% assign size_param = 'filter.v.option.size=' | append: size %}
+                            {% if request.url contains size_param %}
+                              checked
                             {% endif %}
                           >
                           {{- 'square.svg' | inline_asset_content -}}

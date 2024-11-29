@@ -91,6 +91,10 @@
                                   checked
                                 {% endif %}
                               {% endif %}
+                              {% assign size_param = 'filter.v.option.size=' | append: size %}
+                              {% if request.url contains size_param %}
+                                checked
+                              {% endif %}
                             >
                             <span class="mobile-facets__highlight"></span>
                             {{- 'square.svg' | inline_asset_content -}}

@@ -12,6 +12,7 @@
   Usage:
   {% render 'price', product: product %}
 {% endcomment %}
+
 {%- liquid
   if use_variant
     assign target = product.selected_or_first_available_variant
@@ -89,61 +90,25 @@
           {%- endif -%}
         </span>
       </div>
-      <div class="price__sale">
-        {%- unless product.price_varies == false and product.compare_at_price_varies %}
-          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-          <span>
-            <s class="price-item price-item--regular">
-              {% if settings.currency_code_enabled %}
-                {{ compare_at_price | money_with_currency }}
-              {% else %}
-                {{ compare_at_price | money }}
-              {% endif %}
-            </s>
-          </span>
-        {%- endunless -%}
-        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
-        <span class="price-item price-item--sale price-item--last">
-          {{ money_price }}
-        </span>
-      </div>
-      <small class="unit-price caption{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} hidden{% endif %}">
-        <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
-        <span class="price-item price-item--last">
-          <span>{{- product.selected_or_first_available_variant.unit_price | money -}}</span>
-          <span aria-hidden="true">/</span>
-          <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
-          <span>
-            {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
-              {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
-            {%- endif -%}
-            {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
-          </span>
-        </span>
-      </small>
 
       {% if product.tags contains 'Last Piece' %}
         <div class="last-piece-info">
           <div class="last-piece-tag">Last Piece</div>
           <div class="available-sizes">
             Available in: 
+            {% assign has_sizes = false %}
             {% for variant in product.variants %}
               {% if variant.inventory_quantity > 0 %}
-                <span class="size-badge">{{ variant.title }}</span>
+                {% assign has_sizes = true %}
+                <span class="size-badge">{{ variant.option1 }}</span>
               {% endif %}
             {% endfor %}
+            {% unless has_sizes %}
+              <span class="size-badge">No sizes available</span>
+            {% endunless %}
           </div>
         </div>
       {% endif %}
     </div>
-    {%- if show_badges -%}
-      <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
-        {{ 'products.product.on_sale' | t }}
-      </span>
-
-      <span class="badge price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
-        {{ 'products.product.sold_out' | t }}
-      </span>
-    {%- endif -%}
   </div>
 {% endunless %}

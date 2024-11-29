@@ -130,7 +130,7 @@
 /* Last Piece Styling */
 .last-piece-info {
   margin-top: 1rem;
-  padding-top: 1rem;
+  padding-top: 0.8rem;
   border-top: 1px solid rgba(var(--color-foreground), 0.1);
 }
 
@@ -143,12 +143,18 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .available-sizes {
   font-size: 1.2rem;
   color: rgba(var(--color-foreground), 0.85);
   margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .size-badge {
@@ -156,8 +162,10 @@
   background: rgba(var(--color-foreground), 0.06);
   padding: 0.2rem 0.6rem;
   border-radius: 0.3rem;
-  margin: 0.2rem;
   font-weight: 500;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Enhanced Price Display */
@@ -173,4 +181,27 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* Mobile Optimization */
+@media screen and (max-width: 749px) {
+  .last-piece-info {
+    margin-top: 0.8rem;
+    padding-top: 0.6rem;
+  }
+
+  .last-piece-tag {
+    font-size: 1.1rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .available-sizes {
+    font-size: 1.1rem;
+    margin-top: 0.4rem;
+  }
+
+  .size-badge {
+    font-size: 1rem;
+    padding: 0.15rem 0.5rem;
+  }
 }
