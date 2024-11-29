@@ -1,15 +1,9 @@
 .price {
-  font-size: 1.6rem;
-  letter-spacing: 0.1rem;
-  line-height: calc(1 + 0.5 / var(--font-body-scale));
-  color: rgb(var(--color-foreground));
-}
-
-.price__container {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.8rem;
+  font-size: 1.6rem;
+  color: rgb(var(--color-foreground));
 }
 
 /* Regular Price */
@@ -18,7 +12,7 @@
   color: rgb(var(--color-foreground));
 }
 
-/* Sale Price Styling */
+/* Sale Price */
 s.price-item--regular {
   color: rgba(var(--color-foreground), 0.75);
   text-decoration: line-through;
@@ -29,6 +23,7 @@ s.price-item--regular {
   font-weight: 700;
 }
 
+/* Discount Badge */
 .price-item__discount-badge {
   background: #E31837;
   color: #FFFFFF;
