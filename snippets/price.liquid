@@ -1,35 +1,40 @@
 {%- liquid
+  # Determine which variant to use for price display
   if use_variant
     assign target = product.selected_or_first_available_variant
   else
     assign target = product
   endif
 
-  assign compare_at_price = target.compare_at_price
-  assign price = target.price | default: 1999
+  # Get the prices
+  assign regular_price = target.price | default: 1999
+  assign compare_price = target.compare_at_price
   assign available = target.available | default: false
-  assign money_price = price | money
-  assign money_compare_at_price = compare_at_price | money
 
+  # Format the prices with currency
+  assign regular_price_display = regular_price | money
+  assign compare_price_display = compare_price | money
+
+  # Handle price ranges for products with variants
   if target == product and product.price_varies
-    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+    assign regular_price_display = 'products.product.price.from_price_html' | t: price: regular_price_display
   endif
 
-  # Calculate discount percentage
+  # Calculate discount percentage if there's a sale
   assign discount_percentage = 0
-  if compare_at_price > price
-    assign discount_percentage = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+  if compare_price > regular_price
+    assign discount_percentage = compare_price | minus: regular_price | times: 100.0 | divided_by: compare_price | round
   endif
 -%}
 
 <div class="price">
   <div class="price__container">
-    {%- if compare_at_price > price -%}
-      <s class="price-item price-item--regular">{{ money_compare_at_price }}</s>
-      <span class="price-item price-item--sale">{{ money_price }}</span>
+    {%- if compare_price > regular_price -%}
+      <s class="price-item price-item--regular">{{ compare_price_display }}</s>
+      <span class="price-item price-item--sale">{{ regular_price_display }}</span>
       <span class="price-item__discount-badge">-{{ discount_percentage }}%</span>
     {%- else -%}
-      <span class="price-item price-item--regular">{{ money_price }}</span>
+      <span class="price-item price-item--regular">{{ regular_price_display }}</span>
     {%- endif -%}
   </div>
 </div>
