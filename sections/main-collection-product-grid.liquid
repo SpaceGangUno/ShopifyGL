@@ -2,6 +2,10 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 
+{% if section.settings.image_shape == 'blob' %}
+  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
 {%- style -%}
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
@@ -92,7 +96,7 @@
       "type": "range",
       "id": "products_per_page",
       "min": 8,
-      "max": 36,
+      "max": 24,
       "step": 4,
       "default": 16,
       "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
@@ -129,6 +133,27 @@
       ],
       "default": "adapt",
       "label": "t:sections.main-collection-product-grid.settings.image_ratio.label"
+    },
+    {
+      "type": "select",
+      "id": "image_shape",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:sections.all.image_shape.options__1.label"
+        },
+        {
+          "value": "arch",
+          "label": "t:sections.all.image_shape.options__2.label"
+        },
+        {
+          "value": "blob",
+          "label": "t:sections.all.image_shape.options__3.label"
+        }
+      ],
+      "default": "default",
+      "label": "t:sections.all.image_shape.label",
+      "info": "t:sections.all.image_shape.info"
     },
     {
       "type": "checkbox",
