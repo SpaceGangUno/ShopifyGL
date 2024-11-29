@@ -5,7 +5,7 @@
 {{ 'component-rating.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 
-<div class="card-wrapper product-card-wrapper">
+<div class="card-wrapper product-card-wrapper underline-links-hover">
   {%- if card_product and card_product != empty -%}
     <div class="
       card
@@ -20,7 +20,6 @@
         {%- if card_product.featured_media -%}
           <div class="card__media">
             <div class="media media--transparent media--hover-effect">
-              {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
               <img
                 srcset="{%- if card_product.featured_media.width >= 165 -%}{{ card_product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
                   {%- if card_product.featured_media.width >= 360 -%}{{ card_product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
@@ -35,24 +34,6 @@
                 width="{{ card_product.featured_media.width }}"
                 height="{{ card_product.featured_media.height }}"
               >
-              {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
-
-              {%- if card_product.media[1] != null and show_secondary_image -%}
-                <img
-                  srcset="{%- if card_product.media[1].width >= 165 -%}{{ card_product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 360 -%}{{ card_product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 533 -%}{{ card_product.media[1] | image_url: width: 533 }} 533w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 720 -%}{{ card_product.media[1] | image_url: width: 720 }} 720w,{%- endif -%}
-                    {{ card_product.media[1] | image_url }} {{ card_product.media[1].width }}w"
-                  src="{{ card_product.media[1] | image_url: width: 533 }}"
-                  sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                  alt=""
-                  class="motion-reduce"
-                  loading="lazy"
-                  width="{{ card_product.media[1].width }}"
-                  height="{{ card_product.media[1].height }}"
-                >
-              {%- endif -%}
             </div>
           </div>
         {%- endif -%}
@@ -71,7 +52,7 @@
 
               <span class="caption-large light">{{ block.settings.description | escape }}</span>
 
-              {% render 'price', product: card_product, show_compare_at_price: true %}
+              {% render 'price', product: card_product %}
             </div>
           </div>
           <div class="card__badge {{ settings.badge_position }}">

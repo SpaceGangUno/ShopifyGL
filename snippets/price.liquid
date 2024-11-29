@@ -32,14 +32,6 @@
   {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
   {%- if show_badges %} price--show-badge{% endif -%}">
   <div class="price__container">
-    {%- comment -%}
-      Explanation of description list:
-        - div.price__regular: Regular price (when no variant is on sale)
-        - div.price__sale: Sale price (when variant is on sale)
-        - div.price__unit: Unit price (when variant has unit price)
-        - div.price__availability: Availability (when variant is sold out)
-    {%- endcomment -%}
-
     <div class="price__regular">
       <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
       <span class="price-item price-item--regular">
@@ -58,15 +50,19 @@
         {{ money_price }}
       </span>
     </div>
-    <div class="price__badges price__badges--{{ settings.badge_position }}">
-      {%- unless available -%}
-        <span class="price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
-          {{ 'products.product.sold_out' | t }}
+    <small class="unit-price caption{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} hidden{% endif %}">
+      <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+      <span class="price-item price-item--last">
+        <span>{{- product.selected_or_first_available_variant.unit_price | money -}}</span>
+        <span aria-hidden="true">/</span>
+        <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+        <span>
+          {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
+            {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
+          {%- endif -%}
+          {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
         </span>
-      {%- endunless -%}
-      <span class="price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
-        {{ 'products.product.on_sale' | t }}
       </span>
-    </div>
+    </small>
   </div>
 </div>

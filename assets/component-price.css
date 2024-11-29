@@ -79,32 +79,12 @@
   justify-content: center;
 }
 
-.price--on-sale .price-item--regular {
-  text-decoration: line-through;
-  color: rgba(var(--color-foreground), 0.75);
-  font-size: 1.4rem;
-}
-
-.price--on-sale .price-item--sale {
+.unit-price {
+  display: block;
+  font-size: 1.1rem;
+  letter-spacing: 0.04rem;
+  line-height: calc(1 + 0.2 / var(--font-body-scale));
+  margin-top: 0.2rem;
+  text-transform: uppercase;
   color: rgb(var(--color-foreground));
-}
-
-.price__badge-sale {
-  background: rgb(var(--color-badge));
-  color: rgb(var(--color-background));
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.3rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-left: 0.8rem;
-}
-
-.price__badge-sold-out {
-  background: rgb(var(--color-badge));
-  color: rgb(var(--color-background));
-  padding: 0.2rem 0.6rem;
-  border-radius: 0.3rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-left: 0.8rem;
 }
