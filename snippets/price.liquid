@@ -1,12 +1,6 @@
-{% comment %}
-  Renders a product's price with discounts and available sizes for last piece items
-{% endcomment %}
-
 {%- liquid
   if use_variant
     assign target = product.selected_or_first_available_variant
-  elsif placeholder
-    assign target = null
   else
     assign target = product
   endif
@@ -28,37 +22,14 @@
   endif
 -%}
 
-{%- unless target == null and placeholder == null -%}
-  <div class="price{% if price_class %} {{ price_class }}{% endif %}">
-    <div class="price__container">
-      <div class="price__regular">
-        {%- if compare_at_price > price -%}
-          <s class="price-item price-item--regular">{{ money_compare_at_price }}</s>
-          <span class="price-item price-item--sale">{{ money_price }}</span>
-          <span class="price-item__discount-badge">-{{ discount_percentage }}%</span>
-        {%- else -%}
-          <span class="price-item price-item--regular">{{ money_price }}</span>
-        {%- endif -%}
-      </div>
-
-      {% if product.tags contains 'Last Piece' %}
-        <div class="last-piece-info">
-          <div class="last-piece-tag">Last Piece</div>
-          <div class="available-sizes">
-            Available in: 
-            {% assign has_sizes = false %}
-            {% for variant in product.variants %}
-              {% if variant.inventory_quantity > 0 %}
-                {% assign has_sizes = true %}
-                <span class="size-badge">{{ variant.option1 }}</span>
-              {% endif %}
-            {% endfor %}
-            {% unless has_sizes %}
-              <span class="size-badge">No sizes available</span>
-            {% endunless %}
-          </div>
-        </div>
-      {% endif %}
-    </div>
+<div class="price">
+  <div class="price__container">
+    {%- if compare_at_price > price -%}
+      <s class="price-item price-item--regular">{{ money_compare_at_price }}</s>
+      <span class="price-item price-item--sale">{{ money_price }}</span>
+      <span class="price-item__discount-badge">-{{ discount_percentage }}%</span>
+    {%- else -%}
+      <span class="price-item price-item--regular">{{ money_price }}</span>
+    {%- endif -%}
   </div>
-{% endunless %}
+</div>
