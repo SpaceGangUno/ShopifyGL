@@ -25,31 +25,48 @@
   assign money_compare_at_price = compare_at_price | money
 -%}
 
-<div class="price{% if price_class %} {{ price_class }}{% endif %}">
-  {%- if available -%}
-    {%- if compare_at_price > price -%}
-      <div class="price__sale">
-        <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+<div class="price
+  {%- if price_class %} {{ price_class }}{% endif -%}
+  {%- if available == false %} price--sold-out{% endif -%}
+  {%- if compare_at_price > price %} price--on-sale{% endif -%}
+  {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
+  {%- if show_badges %} price--show-badge{% endif -%}">
+  <div class="price__container">
+    {%- comment -%}
+      Explanation of description list:
+        - div.price__regular: Regular price (when no variant is on sale)
+        - div.price__sale: Sale price (when variant is on sale)
+        - div.price__unit: Unit price (when variant has unit price)
+        - div.price__availability: Availability (when variant is sold out)
+    {%- endcomment -%}
+
+    <div class="price__regular">
+      <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+      <span class="price-item price-item--regular">
+        {{ money_price }}
+      </span>
+    </div>
+    <div class="price__sale">
+      <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+      <span>
         <s class="price-item price-item--regular">
           {{ money_compare_at_price }}
         </s>
-        <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
-        <span class="price-item price-item--sale price-item--last">
-          {{ money_price }}
-        </span>
-      </div>
-    {%- else -%}
-      <div class="price__regular">
-        <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
-        <span class="price-item price-item--regular">
-          {{ money_price }}
-        </span>
-      </div>
-    {%- endif -%}
-  {%- else -%}
-    <div class="price__availability">
-      <span class="visually-hidden">{{ 'products.product.price.sold_out' | t }}</span>
-      <span class="sold-out-text">{{ 'products.product.sold_out' | t }}</span>
+      </span>
+      <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+      <span class="price-item price-item--sale">
+        {{ money_price }}
+      </span>
     </div>
-  {%- endif -%}
+    <div class="price__badges price__badges--{{ settings.badge_position }}">
+      {%- unless available -%}
+        <span class="price__badge-sold-out color-{{ settings.sold_out_badge_color_scheme }}">
+          {{ 'products.product.sold_out' | t }}
+        </span>
+      {%- endunless -%}
+      <span class="price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
+        {{ 'products.product.on_sale' | t }}
+      </span>
+    </div>
+  </div>
 </div>
