@@ -3,68 +3,66 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 // Store all SKUs and their quantities
-const allSkus = `9906	1
-3149	1
-5992125	1
-G838396	1
-830229E	1
-285885M	2
-L678506	2
-7327378	1
-R821986	1
-385790J	1
-Z405165	1
-209911V	1
-5054438	1
-D397680	1
-492	1
-3299	1
-3302	1
-552	2
-553	4
-554	4
-555	1
-517	1
-519	1
-520	1
-3318	2
-3336	2
-3338	1
-3339	1
-3367	2
-3372	2
-3373	1
-859377X	1
-V264679	1
-B670602	1
-498778Q	1
-D996299	1
-547851L	2
-D042048	1
-8550145	2
-M128332	1
-T795235	1
-951562G	1
-H849363	1
-2464370	2
-K491571	1
-	1
-	1
-	1
-	1
-	1`;
+const allSkus = `3374	1
+3375	1
+3376	1
+3377	1
+3378	1
+3379	1
+3380	1
+3381	1
+3382	1
+3383	1
+3384	1
+3385	1
+3386	1
+3387	1
+3388	1
+3389	1
+3390	1
+3391	1
+3392	1
+3393	1
+3394	1
+3395	1
+3396	1
+3397	1
+3398	1
+3399	1
+3400	1
+3401	1
+3402	1
+3403	1
+3404	1
+3405	1
+3406	1
+3407	1
+3408	1
+3409	1
+3410	1
+3411	1
+3412	1
+3413	1
+3414	1
+3415	1
+3416	1
+3417	1
+3418	1
+3419	1
+3420	1
+3421	1
+3422	1
+3423	1`;
 
 // Split SKUs into batches of 50
 const skus = allSkus.split('\n')
   .map(line => {
     const [sku, quantity] = line.trim().split('\t');
-    if (!sku || sku === '') return null;  // Skip empty SKUs
     return {
       sku,
       quantity: parseInt(quantity) || 0
     };
-  })
-  .filter(item => item !== null);  // Remove null entries
+  });
 
 const batchSize = 50;
 const batches = [];
