@@ -46,27 +46,27 @@
         "collapsible_row_gNwHXp": {
           "type": "collapsible_row",
           "settings": {
-            "heading": "Collapsible row",
-            "icon": "check_mark",
-            "row_content": "",
+            "heading": "What is your return policy?",
+            "icon": "box",
+            "row_content": "<p>We offer hassle-free returns within 30 days of purchase. Items must be unworn, unwashed, and in original packaging. Simply visit our Returns Center to start the process. Please note, sale items and mystery boxes are final sale.</p>",
             "page": ""
           }
         },
         "collapsible_row_PgPJJt": {
           "type": "collapsible_row",
           "settings": {
-            "heading": "Collapsible row",
-            "icon": "check_mark",
-            "row_content": "",
+            "heading": "How do mystery boxes work?",
+            "icon": "star",
+            "row_content": "<p>Our mystery boxes are packed with curated streetwear pieces at an unbeatable value. You choose your size, and we’ll surprise you with premium items worth more than what you pay. Mystery boxes are final sale, so let the thrill of the unknown begin!</p>",
             "page": ""
           }
         },
         "collapsible_row_tiqa7w": {
           "type": "collapsible_row",
           "settings": {
-            "heading": "Collapsible row",
-            "icon": "check_mark",
-            "row_content": "",
+            "heading": "Do you offer gift cards?",
+            "icon": "price_tag",
+            "row_content": "<p>Yes, we do! Gear Locker gift cards make the perfect present for any streetwear enthusiast. Choose your amount and let them pick their favorite styles. Gift cards are delivered electronically for instant gifting.</p>",
             "page": ""
           }
         }
