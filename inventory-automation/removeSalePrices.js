@@ -120,6 +120,7 @@ async function removeSalePrices() {
     let successCount = 0;
     let errorCount = 0;
     let variantCount = 0;
+    let salePricesRemoved = 0;
 
     // Process each product
     for (const product of products) {
@@ -132,11 +133,13 @@ async function removeSalePrices() {
           variantCount++;
 
           if (variant.compareAtPrice) {
+            console.log(`Found sale price: Regular $${variant.price}, Sale $${variant.compareAtPrice}`);
             console.log('Removing sale price...');
             await removeSalePrice(variant.id);
             console.log('✓ Sale price removed');
+            salePricesRemoved++;
           } else {
-            console.log('No sale price to remove');
+            console.log('No sale price found');
           }
 
           successCount++;
@@ -156,7 +159,8 @@ async function removeSalePrices() {
     console.log('\n=== Price Update Summary ===');
     console.log(`Total products processed: ${products.length}`);
     console.log(`Total variants processed: ${variantCount}`);
-    console.log(`Successfully updated: ${successCount}`);
+    console.log(`Sale prices removed: ${salePricesRemoved}`);
+    console.log(`Successfully processed: ${successCount}`);
     console.log(`Errors encountered: ${errorCount}`);
     console.log('\nPrice update completed! ✨');
 
