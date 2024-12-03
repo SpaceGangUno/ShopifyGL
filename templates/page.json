@@ -9,6 +9,36 @@
  */
 {
   "sections": {
+    "rich_text_q3Awcg": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_EyMnjg": {
+          "type": "heading",
+          "settings": {
+            "heading": "",
+            "heading_size": "h1"
+          }
+        },
+        "text_kn4hmR": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>Got questions about your drip, your order, or what’s coming next? We’ve got you covered. Drop your info below, and we’ll slide back ASAP.</strong></p>"
+          }
+        }
+      },
+      "block_order": [
+        "heading_EyMnjg",
+        "text_kn4hmR"
+      ],
+      "settings": {
+        "desktop_content_position": "center",
+        "content_alignment": "center",
+        "color_scheme": "scheme-e06ee1b9-465e-4978-81a8-556639459faa",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 0
+      }
+    },
     "main": {
       "type": "main-page",
       "disabled": true,
@@ -94,6 +124,7 @@
     }
   },
   "order": [
+    "rich_text_q3Awcg",
     "main",
     "contact_form_z8pkyP",
     "collapsible_content_RY946m"
