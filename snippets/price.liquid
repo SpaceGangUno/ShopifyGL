@@ -34,14 +34,6 @@
     endif
   endfor
 
-  # If it's in Black Friday collection and no compare price is set, calculate it
-  if is_black_friday
-    if compare_at_price == nil or compare_at_price <= price
-      assign compare_at_price = price
-      assign price = price | times: 0.6 | round
-    endif
-  endif
-
   assign price_min = product.price_min
   assign price_max = product.price_max
   assign available = target.available | default: false
@@ -71,7 +63,7 @@
       price
       {%- if price_class %} {{ price_class }}{% endif -%}
       {%- if available == false %} price--sold-out{% endif -%}
-      {%- if compare_at_price > price or is_black_friday %} price--on-sale{% endif -%}
+      {%- if compare_at_price > price %} price--on-sale{% endif -%}
       {%- if product.price_varies == false and product.compare_at_price_varies %} price--no-compare{% endif -%}
       {%- if show_badges %} price--show-badge{% endif -%}
     "
@@ -80,7 +72,7 @@
       <div class="price__regular">
         <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
         <span class="price-item price-item--regular">
-          {%- if compare_at_price > price or is_black_friday -%}
+          {%- if compare_at_price > price -%}
             <s class="price-item price-item--regular">{{ compare_at_price | money }}</s>
             <span class="price-item price-item--sale">{{ money_price }}</span>
             <span class="price-item__discount-badge">{{ discount_percentage }}% OFF</span>

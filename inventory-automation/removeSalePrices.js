@@ -18,7 +18,7 @@ async function getCollectionProducts() {
   try {
     const query = `
       {
-        collections(first: 1, query: "title:'Custom Black Friday'") {
+        collections(first: 1, query: "title:'Black Friday'") {
           edges {
             node {
               id
@@ -110,7 +110,7 @@ async function delay(ms) {
 
 async function removeSalePrices() {
   try {
-    console.log('=== Removing Sale Prices from Custom Black Friday Collection ===');
+    console.log('=== Removing Sale Prices from Black Friday Collection ===');
     
     // Get all products in collection
     console.log('Fetching products...');
