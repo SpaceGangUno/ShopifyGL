@@ -26,14 +26,6 @@
   assign original_price = price
   assign is_black_friday = false
 
-  # Check if product is in Custom Black Friday collection
-  for collection in product.collections
-    if collection.title == 'Custom Black Friday'
-      assign is_black_friday = true
-      break
-    endif
-  endfor
-
   assign price_min = product.price_min
   assign price_max = product.price_max
   assign available = target.available | default: false
@@ -72,30 +64,6 @@
       <div class="price__regular">
         <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
         <span class="price-item price-item--regular">
-          {%- if compare_at_price > price -%}
-            <s class="price-item price-item--regular">{{ compare_at_price | money }}</s>
-            <span class="price-item price-item--sale">{{ money_price }}</span>
-            <span class="price-item__discount-badge">{{ discount_percentage }}% OFF</span>
-          {%- else -%}
-            {{ money_price }}
-          {%- endif -%}
-        </span>
-      </div>
-      <div class="price__sale">
-        {%- unless product.price_varies == false and product.compare_at_price_varies %}
-          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
-          <span>
-            <s class="price-item price-item--regular">
-              {% if settings.currency_code_enabled %}
-                {{ compare_at_price | money_with_currency }}
-              {% else %}
-                {{ compare_at_price | money }}
-              {% endif %}
-            </s>
-          </span>
-        {%- endunless -%}
-        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
-        <span class="price-item price-item--sale price-item--last">
           {{ money_price }}
         </span>
       </div>
