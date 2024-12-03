@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^1.6.2",
     "dotenv": "^16.3.1",
+    "shopify-api-node": "^3.14.0",
     "square": "^39.0.0"
   }
 }
