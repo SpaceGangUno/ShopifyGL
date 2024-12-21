@@ -28,12 +28,12 @@
     "featured_collection_N4gBxm": {
       "type": "featured-collection",
       "settings": {
-        "title": "Black Friday Deals",
-        "heading_size": "h2",
-        "description": "",
+        "title": "New Arrivals",
+        "heading_size": "h1",
+        "description": "<p>Newest Drip to Arrive</p>",
         "show_description": false,
         "description_style": "body",
-        "collection": "custom-black-friday",
+        "collection": "new",
         "products_to_show": 10,
         "columns_desktop": 5,
         "full_width": false,
