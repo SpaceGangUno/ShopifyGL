@@ -14,7 +14,7 @@
       "settings": {
         "image": "shopify://shop_images/Copy_of_Green_Mens_Clothing_Website_Template_-_Client_Official.png",
         "image_overlay_opacity": 0,
-        "image_height": "adapt",
+        "image_height": "medium",
         "desktop_content_position": "middle-center",
         "show_text_box": true,
         "desktop_content_alignment": "center",
