@@ -149,7 +149,7 @@
       ],
       "settings": {
         "title": "Shop by Category",
-        "heading_size": "h2",
+        "heading_size": "h1",
         "image_ratio": "square",
         "columns_desktop": 4,
         "color_scheme": "scheme-5",
