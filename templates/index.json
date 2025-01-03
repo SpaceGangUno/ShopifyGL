@@ -163,8 +163,8 @@
     "featured_collection_gABJdn": {
       "type": "featured-collection",
       "settings": {
-        "title": "T-Shirts",
-        "heading_size": "h2",
+        "title": "Newest Shirt's",
+        "heading_size": "h1",
         "description": "",
         "show_description": false,
         "description_style": "body",
